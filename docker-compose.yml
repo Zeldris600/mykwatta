@@ -1,6 +1,6 @@
 services:
   api:
-    image: ${MYKWATTA_IMAGE:-ghcr.io/zeldris600/mykwatta:latest}
+    image: ${MYKWATTA_IMAGE:-ghcr.io/zeldris600/mykwatta:staging}
     pull_policy: always
     restart: unless-stopped
     ports:
@@ -10,7 +10,7 @@ services:
     command: ['node', 'dist/src/main.js']
 
   worker:
-    image: ${MYKWATTA_IMAGE:-ghcr.io/zeldris600/mykwatta:latest}
+    image: ${MYKWATTA_IMAGE:-ghcr.io/zeldris600/mykwatta:staging}
     pull_policy: always
     restart: unless-stopped
     env_file:

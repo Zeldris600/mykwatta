@@ -2,10 +2,12 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
   Query,
+  forwardRef,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { OptionalAuth, Session } from '@thallesp/nestjs-better-auth';
@@ -27,6 +29,7 @@ export class ListingsController {
     private readonly listingsService: ListingsService,
     private readonly mediaService: ListingMediaService,
     private readonly savedListingsService: SavedListingsService,
+    @Inject(forwardRef(() => DepositAvailabilityService))
     private readonly depositAvailability: DepositAvailabilityService,
   ) {}
 

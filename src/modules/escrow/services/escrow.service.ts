@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { desc, eq, or } from 'drizzle-orm';
 import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
 import { createId } from '@mykwatta/core/common/utils/uuid.util';
@@ -20,6 +20,7 @@ export class EscrowService {
 
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDb,
+    @Inject(forwardRef(() => ListingsService))
     private readonly listings: ListingsService,
     private readonly identity: IdentityService,
   ) {}

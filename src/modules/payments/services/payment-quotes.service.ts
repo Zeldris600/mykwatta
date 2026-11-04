@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
 import { CurrencyCode } from '@mykwatta/core/common/utils/money/currency';
 import { ListingStatus } from '@mykwatta/modules/listings/constants';
@@ -27,6 +27,7 @@ export type PaymentQuote = {
 @Injectable()
 export class PaymentQuotesService {
   constructor(
+    @Inject(forwardRef(() => ListingsService))
     private readonly listings: ListingsService,
     private readonly rentSchedules: RentSchedulesService,
   ) {}
