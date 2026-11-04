@@ -55,7 +55,7 @@ async function bootstrap() {
     .setDescription(swaggerDescription)
     .setVersion('0.1.0')
     .addBearerAuth()
-    .addExternalDoc('Better Auth reference (phone OTP)', authReferenceUrl)
+    .setExternalDoc('Better Auth reference (phone OTP)', authReferenceUrl)
     .build();
   SwaggerModule.setup(
     'api/docs',
