@@ -4,9 +4,18 @@ import { bearer, openAPI, phoneNumber } from 'better-auth/plugins';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '@mykwatta/core/database/schema';
+import { requireEnv } from '@mykwatta/modules/identity/auth/require-env';
 import { enqueueOtp } from '@mykwatta/shared/twilio/otp.bridge';
 
-const client = postgres(process.env.DATABASE_URL!, { max: 5, prepare: false });
+const env = requireEnv([
+  'DATABASE_URL',
+  'APP_NAME',
+  'BETTER_AUTH_URL',
+  'BETTER_AUTH_SECRET',
+  'CORS_ORIGIN',
+]);
+
+const client = postgres(env.DATABASE_URL, { max: 5, prepare: false });
 const db = drizzle(client, { schema });
 
 const nodeEnv = process.env.NODE_ENV ?? 'development';
@@ -25,9 +34,9 @@ export const AUTH_DEV_OTP = (process.env.AUTH_DEV_OTP ?? '000000').trim();
  * Env is validated by AppConfigModule before the app serves traffic.
  */
 export const auth = betterAuth({
-  appName: process.env.APP_NAME!,
-  baseURL: process.env.BETTER_AUTH_URL!,
-  secret: process.env.BETTER_AUTH_SECRET!,
+  appName: env.APP_NAME,
+  baseURL: env.BETTER_AUTH_URL,
+  secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: {
@@ -37,8 +46,7 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
-  trustedOrigins: process.env
-    .CORS_ORIGIN!.split(',')
+  trustedOrigins: env.CORS_ORIGIN.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean),
   plugins: [

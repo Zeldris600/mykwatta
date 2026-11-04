@@ -5,12 +5,16 @@ services:
     restart: unless-stopped
     ports:
       - '${PORT:-3000}:3000'
+    env_file:
+      - .env
     command: ['node', 'dist/src/main.js']
 
   worker:
     image: ${MYKWATTA_IMAGE:-ghcr.io/zeldris600/mykwatta:latest}
     pull_policy: always
     restart: unless-stopped
+    env_file:
+      - .env
     depends_on:
       - api
     command: ['node', 'dist/src/worker.js']
