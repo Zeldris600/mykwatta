@@ -5,19 +5,18 @@
 | `staging` | `:staging` | `staging` | `DOKPLOY_WEBHOOK_URL_STAGING` |
 | `main` | `:latest` | `production` | `DOKPLOY_WEBHOOK_URL_MAIN` |
 
-PRs only run lint/build/test (no push/deploy).
+## Dokploy compose (important)
 
-## Fix your GitHub env secrets
+Use repo file **`docker-compose.yml`** (pulls GHCR). Do **not** deploy `docker-compose.dev.yml` — that builds `Dockerfile.dev` and will fail on Dokploy.
 
-- **staging** env → `DOKPLOY_WEBHOOK_URL_STAGING` = Dokploy **staging** webhook  
-- **production** env → `DOKPLOY_WEBHOOK_URL_MAIN` = Dokploy **prod** webhook  
+In Dokploy env set:
 
-Do **not** put the staging webhook secret on production.
+```env
+MYKWATTA_IMAGE=ghcr.io/zeldris600/mykwatta:staging   # or :latest for prod
+```
 
-Optional: restrict each environment’s **Deployment branches** to `staging` / `main`.
+Plus your app secrets (`DATABASE_URL`, `REDIS_URL`, …).
 
-## Dokploy
+Provider: Docker Compose → compose file `docker-compose.yml` → registry `ghcr.io` with a PAT that can `read:packages`.
 
-- Staging app image: `ghcr.io/<owner>/mykwatta:staging`  
-- Prod app image: `ghcr.io/<owner>/mykwatta:latest`  
-- Registry: `ghcr.io` + GitHub PAT (`read:packages`)
+After CI pushes a new tag, the webhook redeploys and Compose pulls the new image.
