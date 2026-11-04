@@ -1,0 +1,14 @@
+export enum PaymentPurpose {
+  LISTING_DEPOSIT = 'LISTING_DEPOSIT',
+  VIEWING_FEE = 'VIEWING_FEE',
+  APPLICATION_FEE = 'APPLICATION_FEE',
+  PLATFORM_FEE = 'PLATFORM_FEE',
+  RENT_PAYMENT = 'RENT_PAYMENT',
+  VENDOR_LEAD_FEE = 'VENDOR_LEAD_FEE',
+  DOCS_VERIFICATION = 'DOCS_VERIFICATION',
+}
+
+export const PAYMENT_PURPOSES = Object.values(PaymentPurpose) as [
+  PaymentPurpose,
+  ...PaymentPurpose[],
+];

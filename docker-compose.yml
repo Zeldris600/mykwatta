@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mykwatta-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mykwatta
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d mykwatta']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: mykwatta-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # S3-compatible object storage (primary for local/dev)
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: mykwatta-rustfs
+    restart: unless-stopped
+    ports:
+      - '9000:9000' # S3 API
+      - '9001:9001' # Console
+    environment:
+      RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY:-mykwatta}
+      RUSTFS_SECRET_KEY: ${S3_SECRET_KEY:-mykwatta-secret-change-me}
+      RUSTFS_ADDRESS: ':9000'
+      RUSTFS_CONSOLE_ADDRESS: ':9001'
+      RUSTFS_CONSOLE_ENABLE: 'true'
+      RUSTFS_REGION: ${S3_REGION:-us-east-1}
+      RUSTFS_OBS_LOGGER_LEVEL: error
+      RUSTFS_OBS_LOG_DIRECTORY: /var/log/rustfs/
+    volumes:
+      - rustfs_data:/data
+      - rustfs_logs:/var/log/rustfs/
+    command: ['/data']
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:9000/health']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  postgres_data:
+  redis_data:
+  rustfs_data:
+  rustfs_logs:

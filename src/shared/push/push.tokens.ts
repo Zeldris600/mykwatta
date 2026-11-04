@@ -1,0 +1,3 @@
+export const FCM_PUSH_PROVIDER = Symbol('FCM_PUSH_PROVIDER');
+export const APNS_PUSH_PROVIDER = Symbol('APNS_PUSH_PROVIDER');
+export const CONSOLE_PUSH_PROVIDER = Symbol('CONSOLE_PUSH_PROVIDER');

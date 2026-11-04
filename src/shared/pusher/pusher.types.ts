@@ -1,0 +1,45 @@
+import type { NotificationMetadata } from '@mykwatta/modules/notifications/constants';
+import type {
+  NotificationEntityType,
+  NotificationType,
+} from '@mykwatta/modules/notifications/constants';
+
+/** Payload emitted on `private-user-{userId}` — mirrors a notifications row. */
+export type NotificationRealtimePayload = {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  entityType: NotificationEntityType | null;
+  entityId: string | null;
+  metadata: NotificationMetadata;
+  readAt: string | null;
+  createdAt: string;
+};
+
+export type PusherChannelAuthResponse = {
+  auth: string;
+  channel_data?: string;
+  shared_secret?: string;
+};
+
+export type PusherClientConfig = {
+  mode: string;
+  key: string | null;
+  cluster: string | null;
+  channel: string;
+  event: string;
+};
+
+export interface PusherProvider {
+  trigger(
+    channel: string,
+    event: string,
+    data: NotificationRealtimePayload,
+  ): Promise<void>;
+  authorizeChannel(
+    socketId: string,
+    channel: string,
+  ): PusherChannelAuthResponse;
+}
