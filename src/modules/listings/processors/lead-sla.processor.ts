@@ -22,8 +22,10 @@ export class LeadSlaProcessor extends WorkerHost {
 
   @OnWorkerEvent('failed')
   onFailed(job: Job | undefined, error: Error): void {
+    const cause =
+      error.cause instanceof Error ? error.cause.message : undefined;
     this.logger.error(
-      `Lead SLA job ${job?.id ?? 'unknown'} failed: ${error.message}`,
+      `Lead SLA job ${job?.id ?? 'unknown'} failed: ${error.message}${cause ? ` | cause: ${cause}` : ''}`,
       error.stack,
     );
   }

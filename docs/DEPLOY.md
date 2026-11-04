@@ -45,3 +45,9 @@ Auth boots **before** Nest config validation. Missing auth env now throws:
 `[auth] Missing required environment variable(s): CORS_ORIGIN, …`
 
 not a cryptic `.split` TypeError.
+
+## Database migrations
+
+The **API** container applies Drizzle migrations from `dist/src/core/database/migrations` on every boot (unless `MIGRATE_ON_BOOT=false`). Worker does not migrate.
+
+After deploy, API logs should include `Applying migrations…` / `Migrations up to date`. If lead-SLA queries fail with missing columns (`sla_due_at`, etc.), the DB is behind — redeploy API so migrate runs, or run `pnpm run db:migrate` against `DATABASE_URL`.

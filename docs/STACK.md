@@ -26,7 +26,7 @@ App env (see `.env.example`). Compose loads **`.env` via `env_file` only** (no h
 - Pusher: `PUSHER_MODE=CONSOLE|LIVE` — private `private-user-{userId}` + event `notification`; auth `POST /api/notifications/pusher/auth`
 - Push: `PUSH_MODE=CONSOLE|LIVE` — FCM + APNs via registered `push_devices` (`POST /api/notifications/devices`)
 
-With `NODE_ENV=development`, the API migrates on boot and seeds if empty (`SEED_ON_BOOT=true` to wipe+seed every boot).
+The API always migrates on boot (`MIGRATE_ON_BOOT=false` to skip). With `NODE_ENV=development`, it also seeds if empty (`SEED_ON_BOOT=true` to wipe+seed every boot).
 
 ### Seed data
 
