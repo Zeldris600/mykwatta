@@ -72,40 +72,47 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy:
+  deploy-staging:
     needs: docker
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
+    environment: staging
     steps:
-      - name: Trigger Dokploy webhook
+      - name: Trigger Dokploy webhook (staging)
         env:
-          DOKPLOY_WEBHOOK_URL_MAIN: ${{ secrets.DOKPLOY_WEBHOOK_URL_MAIN }}
           DOKPLOY_WEBHOOK_URL_STAGING: ${{ secrets.DOKPLOY_WEBHOOK_URL_STAGING }}
-          # Back-compat: single webhook still works for main if _MAIN is unset
-          DOKPLOY_WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
-          REF: ${{ github.ref }}
-          REPO: ${{ github.repository }}
+          PACKAGE_URL: ghcr.io/${{ github.repository }}:staging
         run: |
           set -euo pipefail
-
-          if [ "$REF" = "refs/heads/staging" ]; then
-            WEBHOOK="${DOKPLOY_WEBHOOK_URL_STAGING:-}"
-            TAG=staging
-          else
-            WEBHOOK="${DOKPLOY_WEBHOOK_URL_MAIN:-${DOKPLOY_WEBHOOK_URL:-}}"
-            TAG=latest
-          fi
-
-          if [ -z "$WEBHOOK" ]; then
-            echo "Missing Dokploy webhook secret for this branch."
-            echo "staging → DOKPLOY_WEBHOOK_URL_STAGING"
-            echo "main    → DOKPLOY_WEBHOOK_URL_MAIN (or DOKPLOY_WEBHOOK_URL)"
+          if [ -z "${DOKPLOY_WEBHOOK_URL_STAGING:-}" ]; then
+            echo "Add environment secret DOKPLOY_WEBHOOK_URL_STAGING on GitHub Environment 'staging'."
             exit 1
           fi
-
-          PACKAGE_URL="ghcr.io/${REPO}:${TAG}"
           echo "Deploying ${PACKAGE_URL}"
-          curl -fsS -X POST "$WEBHOOK" \
+          curl -fsS -X POST "$DOKPLOY_WEBHOOK_URL_STAGING" \
+            -H "Content-Type: application/json" \
+            -H "x-github-event: registry_package" \
+            -d "{\"registry_package\":{\"package_version\":{\"package_url\":\"${PACKAGE_URL}\"}}}"
+          echo
+
+  deploy-production:
+    needs: docker
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Trigger Dokploy webhook (production)
+        env:
+          DOKPLOY_WEBHOOK_URL_MAIN: ${{ secrets.DOKPLOY_WEBHOOK_URL_MAIN }}
+          PACKAGE_URL: ghcr.io/${{ github.repository }}:latest
+        run: |
+          set -euo pipefail
+          if [ -z "${DOKPLOY_WEBHOOK_URL_MAIN:-}" ]; then
+            echo "Add environment secret DOKPLOY_WEBHOOK_URL_MAIN on GitHub Environment 'production'."
+            exit 1
+          fi
+          echo "Deploying ${PACKAGE_URL}"
+          curl -fsS -X POST "$DOKPLOY_WEBHOOK_URL_MAIN" \
             -H "Content-Type: application/json" \
             -H "x-github-event: registry_package" \
             -d "{\"registry_package\":{\"package_version\":{\"package_url\":\"${PACKAGE_URL}\"}}}"
