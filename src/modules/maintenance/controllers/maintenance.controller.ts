@@ -16,7 +16,10 @@ export class MaintenanceController {
   constructor(private readonly maintenance: MaintenanceService) {}
 
   @Post('tickets')
-  create(@Session() session: UserSession, @Body() body: CreateMaintenanceTicketDto) {
+  create(
+    @Session() session: UserSession,
+    @Body() body: CreateMaintenanceTicketDto,
+  ) {
     return this.maintenance.create(session.user.id, body);
   }
 
@@ -34,10 +37,7 @@ export class MaintenanceController {
   }
 
   @Get('tickets/:ticketId')
-  getOne(
-    @Param('ticketId') ticketId: string,
-    @Session() session: UserSession,
-  ) {
+  getOne(@Param('ticketId') ticketId: string, @Session() session: UserSession) {
     return this.maintenance.getById(ticketId, session.user.id);
   }
 

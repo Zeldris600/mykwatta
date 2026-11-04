@@ -9,7 +9,10 @@ import { listingDeals } from '@mykwatta/core/database/schema/deals.schema';
 import { listings } from '@mykwatta/core/database/schema/listings.schema';
 import { ApplicationType } from '@mykwatta/modules/applications/constants';
 import { DealStatus, DealType } from '@mykwatta/modules/deals/constants';
-import type { CancelDealDto, CompleteDealDto } from '@mykwatta/modules/deals/dto';
+import type {
+  CancelDealDto,
+  CompleteDealDto,
+} from '@mykwatta/modules/deals/dto';
 import { ListingStatus } from '@mykwatta/modules/listings/constants';
 import { ListingsService } from '@mykwatta/modules/listings/services';
 import {
@@ -64,9 +67,7 @@ export class DealsService {
       columns: { id: true },
     });
     if (activeOnListing) {
-      throw AppException.conflict(
-        'This listing already has an active deal',
-      );
+      throw AppException.conflict('This listing already has an active deal');
     }
 
     const id = createId();
@@ -262,10 +263,7 @@ export class DealsService {
     deal: { ownerUserId: string; counterpartyUserId: string },
     userId: string,
   ): void {
-    if (
-      deal.ownerUserId !== userId &&
-      deal.counterpartyUserId !== userId
-    ) {
+    if (deal.ownerUserId !== userId && deal.counterpartyUserId !== userId) {
       throw AppException.forbidden('You cannot view this deal');
     }
   }

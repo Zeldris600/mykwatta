@@ -70,15 +70,23 @@ export class PaymentQuotesService {
     );
   }
 
-  async quoteVendorLeadFee(): Promise<PaymentQuote> {
+  quoteVendorLeadFee(): PaymentQuote {
     return this.buildQuote(
       PaymentPurpose.VENDOR_LEAD_FEE,
-      [{ label: 'Vendor introduction fee', amountMinor: VENDOR_LEAD_FEE_AMOUNT_MINOR }],
+      [
+        {
+          label: 'Vendor introduction fee',
+          amountMinor: VENDOR_LEAD_FEE_AMOUNT_MINOR,
+        },
+      ],
       CurrencyCode.XAF,
     );
   }
 
-  async quoteRentPayment(scheduleItemId: string, userId: string): Promise<PaymentQuote> {
+  async quoteRentPayment(
+    scheduleItemId: string,
+    userId: string,
+  ): Promise<PaymentQuote> {
     const schedule = await this.rentSchedules.getScheduleItemForTenant(
       scheduleItemId,
       userId,

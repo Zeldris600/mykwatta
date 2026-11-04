@@ -15,7 +15,9 @@ export class RentRemindersProcessor extends WorkerHost {
 
   async process(job: Job): Promise<void> {
     if ((job.name as QueueJobName) !== QueueJobName.RUN_RENT_REMINDERS) {
-      throw AppException.badRequest(`Unsupported rent reminders job: ${job.name}`);
+      throw AppException.badRequest(
+        `Unsupported rent reminders job: ${job.name}`,
+      );
     }
     await this.rentReminders.runDaily();
   }

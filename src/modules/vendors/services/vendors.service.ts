@@ -4,9 +4,15 @@ import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
 import { createId } from '@mykwatta/core/common/utils/uuid.util';
 import { DRIZZLE } from '@mykwatta/core/database';
 import type { DrizzleDb } from '@mykwatta/core/database';
-import { vendorLeads, vendors } from '@mykwatta/core/database/schema/vendors.schema';
+import {
+  vendorLeads,
+  vendors,
+} from '@mykwatta/core/database/schema/vendors.schema';
 import { IdentityService } from '@mykwatta/modules/identity/services';
-import type { CreateVendorDto, RequestVendorLeadDto } from '@mykwatta/modules/vendors/dto';
+import type {
+  CreateVendorDto,
+  RequestVendorLeadDto,
+} from '@mykwatta/modules/vendors/dto';
 import {
   VendorCategory,
   VendorLeadStatus,

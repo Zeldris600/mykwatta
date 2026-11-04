@@ -1,5 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, count, eq, gte, inArray, isNotNull, isNull, lte } from 'drizzle-orm';
+import {
+  and,
+  count,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+} from 'drizzle-orm';
 import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
 import { DRIZZLE } from '@mykwatta/core/database';
 import type { DrizzleDb } from '@mykwatta/core/database';
@@ -244,71 +253,71 @@ export class StatsService {
       occupancyPercent,
       rentDueThisWeek,
     ] = await Promise.all([
-        this.scalarCount(
-          this.db
-            .select({ value: count() })
-            .from(listingInquiries)
-            .innerJoin(listings, eq(listingInquiries.listingId, listings.id))
-            .where(
-              and(
-                eq(listings.ownerUserId, userId),
-                eq(listingInquiries.status, InquiryStatus.OPEN),
-              ),
+      this.scalarCount(
+        this.db
+          .select({ value: count() })
+          .from(listingInquiries)
+          .innerJoin(listings, eq(listingInquiries.listingId, listings.id))
+          .where(
+            and(
+              eq(listings.ownerUserId, userId),
+              eq(listingInquiries.status, InquiryStatus.OPEN),
             ),
-        ),
-        this.scalarCount(
-          this.db
-            .select({ value: count() })
-            .from(listingAppointments)
-            .innerJoin(listings, eq(listingAppointments.listingId, listings.id))
-            .where(
-              and(
-                eq(listings.ownerUserId, userId),
-                eq(listingAppointments.status, AppointmentStatus.CONFIRMED),
-                gte(listingAppointments.scheduledAt, new Date()),
-              ),
+          ),
+      ),
+      this.scalarCount(
+        this.db
+          .select({ value: count() })
+          .from(listingAppointments)
+          .innerJoin(listings, eq(listingAppointments.listingId, listings.id))
+          .where(
+            and(
+              eq(listings.ownerUserId, userId),
+              eq(listingAppointments.status, AppointmentStatus.CONFIRMED),
+              gte(listingAppointments.scheduledAt, new Date()),
             ),
-        ),
-        this.scalarCount(
-          this.db
-            .select({ value: count() })
-            .from(listingApplications)
-            .innerJoin(listings, eq(listingApplications.listingId, listings.id))
-            .where(
-              and(
-                eq(listings.ownerUserId, userId),
-                inArray(listingApplications.status, [
-                  ...ACTIVE_APPLICATION_STATUSES,
-                ]),
-              ),
+          ),
+      ),
+      this.scalarCount(
+        this.db
+          .select({ value: count() })
+          .from(listingApplications)
+          .innerJoin(listings, eq(listingApplications.listingId, listings.id))
+          .where(
+            and(
+              eq(listings.ownerUserId, userId),
+              inArray(listingApplications.status, [
+                ...ACTIVE_APPLICATION_STATUSES,
+              ]),
             ),
-        ),
-        this.scalarCount(
-          this.db
-            .select({ value: count() })
-            .from(listingDeals)
-            .where(
-              and(
-                eq(listingDeals.ownerUserId, userId),
-                eq(listingDeals.status, DealStatus.ACTIVE),
-              ),
+          ),
+      ),
+      this.scalarCount(
+        this.db
+          .select({ value: count() })
+          .from(listingDeals)
+          .where(
+            and(
+              eq(listingDeals.ownerUserId, userId),
+              eq(listingDeals.status, DealStatus.ACTIVE),
             ),
-        ),
-        this.scalarCount(
-          this.db
-            .select({ value: count() })
-            .from(escrowLedger)
-            .where(
-              and(
-                eq(escrowLedger.beneficiaryUserId, userId),
-                eq(escrowLedger.status, EscrowStatus.HELD),
-              ),
+          ),
+      ),
+      this.scalarCount(
+        this.db
+          .select({ value: count() })
+          .from(escrowLedger)
+          .where(
+            and(
+              eq(escrowLedger.beneficiaryUserId, userId),
+              eq(escrowLedger.status, EscrowStatus.HELD),
             ),
-        ),
-        this.maintenance.countOpenForOwner(userId),
-        computeOccupancyPercentForOwner(this.db, userId),
-        this.rentSchedules.rentDueThisWeekForOwner(userId),
-      ]);
+          ),
+      ),
+      this.maintenance.countOpenForOwner(userId),
+      computeOccupancyPercentForOwner(this.db, userId),
+      this.rentSchedules.rentDueThisWeekForOwner(userId),
+    ]);
 
     return {
       listingsByStatus,
@@ -328,67 +337,72 @@ export class StatsService {
   private async seekerPersonaCounters(
     userId: string,
   ): Promise<PersonaStatsCounters> {
-    const [openInquiries, upcomingAppointments, applications, activeDeals, escrowHeld] =
-      await Promise.all([
-        this.scalarCount(
-          this.db
-            .select({ value: count() })
-            .from(listingInquiries)
-            .where(
-              and(
-                eq(listingInquiries.inquirerUserId, userId),
-                eq(listingInquiries.status, InquiryStatus.OPEN),
-              ),
+    const [
+      openInquiries,
+      upcomingAppointments,
+      applications,
+      activeDeals,
+      escrowHeld,
+    ] = await Promise.all([
+      this.scalarCount(
+        this.db
+          .select({ value: count() })
+          .from(listingInquiries)
+          .where(
+            and(
+              eq(listingInquiries.inquirerUserId, userId),
+              eq(listingInquiries.status, InquiryStatus.OPEN),
             ),
-        ),
-        this.scalarCount(
-          this.db
-            .select({ value: count() })
-            .from(listingAppointments)
-            .where(
-              and(
-                eq(listingAppointments.requesterUserId, userId),
-                eq(listingAppointments.status, AppointmentStatus.CONFIRMED),
-                gte(listingAppointments.scheduledAt, new Date()),
-              ),
+          ),
+      ),
+      this.scalarCount(
+        this.db
+          .select({ value: count() })
+          .from(listingAppointments)
+          .where(
+            and(
+              eq(listingAppointments.requesterUserId, userId),
+              eq(listingAppointments.status, AppointmentStatus.CONFIRMED),
+              gte(listingAppointments.scheduledAt, new Date()),
             ),
-        ),
-        this.scalarCount(
-          this.db
-            .select({ value: count() })
-            .from(listingApplications)
-            .where(
-              and(
-                eq(listingApplications.applicantUserId, userId),
-                inArray(listingApplications.status, [
-                  ...ACTIVE_APPLICATION_STATUSES,
-                ]),
-              ),
+          ),
+      ),
+      this.scalarCount(
+        this.db
+          .select({ value: count() })
+          .from(listingApplications)
+          .where(
+            and(
+              eq(listingApplications.applicantUserId, userId),
+              inArray(listingApplications.status, [
+                ...ACTIVE_APPLICATION_STATUSES,
+              ]),
             ),
-        ),
-        this.scalarCount(
-          this.db
-            .select({ value: count() })
-            .from(listingDeals)
-            .where(
-              and(
-                eq(listingDeals.counterpartyUserId, userId),
-                eq(listingDeals.status, DealStatus.ACTIVE),
-              ),
+          ),
+      ),
+      this.scalarCount(
+        this.db
+          .select({ value: count() })
+          .from(listingDeals)
+          .where(
+            and(
+              eq(listingDeals.counterpartyUserId, userId),
+              eq(listingDeals.status, DealStatus.ACTIVE),
             ),
-        ),
-        this.scalarCount(
-          this.db
-            .select({ value: count() })
-            .from(escrowLedger)
-            .where(
-              and(
-                eq(escrowLedger.payerUserId, userId),
-                eq(escrowLedger.status, EscrowStatus.HELD),
-              ),
+          ),
+      ),
+      this.scalarCount(
+        this.db
+          .select({ value: count() })
+          .from(escrowLedger)
+          .where(
+            and(
+              eq(escrowLedger.payerUserId, userId),
+              eq(escrowLedger.status, EscrowStatus.HELD),
             ),
-        ),
-      ]);
+          ),
+      ),
+    ]);
 
     return {
       openInquiries,
@@ -463,10 +477,11 @@ export class StatsService {
   }
 
   private async scalarCount(
-    query: { then?: unknown } | PromiseLike<{ value: number }[]>,
+    query: PromiseLike<ReadonlyArray<{ value: number | string | bigint }>>,
   ): Promise<number> {
     const rows = await query;
-    return Number(rows[0]?.value ?? 0);
+    const first = rows[0];
+    return Number(first?.value ?? 0);
   }
 
   private async assertPlatformAdmin(userId: string): Promise<void> {
@@ -517,41 +532,45 @@ export class StatsService {
     titleDocsPending: number;
   }> {
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const [savedSearchCount, newMatchCount, titleDocsPending] = await Promise.all([
-      this.scalarCount(
-        this.db
-          .select({ value: count() })
-          .from(savedSearches)
-          .where(eq(savedSearches.userId, userId)),
-      ),
-      this.scalarCount(
-        this.db
-          .select({ value: count() })
-          .from(savedSearchMatches)
-          .innerJoin(
-            savedSearches,
-            eq(savedSearchMatches.savedSearchId, savedSearches.id),
-          )
-          .where(
-            and(
-              eq(savedSearches.userId, userId),
-              gte(savedSearchMatches.createdAt, since),
+    const [savedSearchCount, newMatchCount, titleDocsPending] =
+      await Promise.all([
+        this.scalarCount(
+          this.db
+            .select({ value: count() })
+            .from(savedSearches)
+            .where(eq(savedSearches.userId, userId)),
+        ),
+        this.scalarCount(
+          this.db
+            .select({ value: count() })
+            .from(savedSearchMatches)
+            .innerJoin(
+              savedSearches,
+              eq(savedSearchMatches.savedSearchId, savedSearches.id),
+            )
+            .where(
+              and(
+                eq(savedSearches.userId, userId),
+                gte(savedSearchMatches.createdAt, since),
+              ),
             ),
-          ),
-      ),
-      this.scalarCount(
-        this.db
-          .select({ value: count() })
-          .from(listingTitleDocuments)
-          .innerJoin(listings, eq(listingTitleDocuments.listingId, listings.id))
-          .where(
-            and(
-              eq(listings.ownerUserId, userId),
-              eq(listingTitleDocuments.status, TitleDocumentStatus.PENDING),
+        ),
+        this.scalarCount(
+          this.db
+            .select({ value: count() })
+            .from(listingTitleDocuments)
+            .innerJoin(
+              listings,
+              eq(listingTitleDocuments.listingId, listings.id),
+            )
+            .where(
+              and(
+                eq(listings.ownerUserId, userId),
+                eq(listingTitleDocuments.status, TitleDocumentStatus.PENDING),
+              ),
             ),
-          ),
-      ),
-    ]);
+        ),
+      ]);
     return { savedSearchCount, newMatchCount, titleDocsPending };
   }
 
@@ -562,71 +581,75 @@ export class StatsService {
     virtualAppointmentsUpcoming: number;
   }> {
     const now = new Date();
-    const [unassignedLeads, slaBreaches, premiumListings, virtualAppointmentsUpcoming] =
-      await Promise.all([
-        this.scalarCount(
-          ownerUserId
-            ? this.db
-                .select({ value: count() })
-                .from(listingInquiries)
-                .innerJoin(listings, eq(listingInquiries.listingId, listings.id))
-                .where(
-                  and(
-                    eq(listings.ownerUserId, ownerUserId),
-                    eq(listingInquiries.status, InquiryStatus.OPEN),
-                    isNull(listingInquiries.assigneeUserId),
-                  ),
-                )
-            : this.db
-                .select({ value: count() })
-                .from(listingInquiries)
-                .where(
-                  and(
-                    eq(listingInquiries.status, InquiryStatus.OPEN),
-                    isNull(listingInquiries.assigneeUserId),
-                  ),
+    const [
+      unassignedLeads,
+      slaBreaches,
+      premiumListings,
+      virtualAppointmentsUpcoming,
+    ] = await Promise.all([
+      this.scalarCount(
+        ownerUserId
+          ? this.db
+              .select({ value: count() })
+              .from(listingInquiries)
+              .innerJoin(listings, eq(listingInquiries.listingId, listings.id))
+              .where(
+                and(
+                  eq(listings.ownerUserId, ownerUserId),
+                  eq(listingInquiries.status, InquiryStatus.OPEN),
+                  isNull(listingInquiries.assigneeUserId),
                 ),
-        ),
-        this.scalarCount(
-          ownerUserId
-            ? this.db
-                .select({ value: count() })
-                .from(listingInquiries)
-                .innerJoin(listings, eq(listingInquiries.listingId, listings.id))
-                .where(
-                  and(
-                    eq(listings.ownerUserId, ownerUserId),
-                    eq(listingInquiries.status, InquiryStatus.OPEN),
-                    isNull(listingInquiries.firstRespondedAt),
-                    lte(listingInquiries.slaDueAt, now),
-                  ),
-                )
-            : this.db
-                .select({ value: count() })
-                .from(listingInquiries)
-                .where(
-                  and(
-                    eq(listingInquiries.status, InquiryStatus.OPEN),
-                    isNull(listingInquiries.firstRespondedAt),
-                    lte(listingInquiries.slaDueAt, now),
-                  ),
+              )
+          : this.db
+              .select({ value: count() })
+              .from(listingInquiries)
+              .where(
+                and(
+                  eq(listingInquiries.status, InquiryStatus.OPEN),
+                  isNull(listingInquiries.assigneeUserId),
                 ),
-        ),
-        this.scalarCount(
-          this.db
-            .select({ value: count() })
-            .from(listings)
-            .where(
-              ownerUserId
-                ? and(
-                    eq(listings.ownerUserId, ownerUserId),
-                    eq(listings.isPremium, true),
-                  )
-                : eq(listings.isPremium, true),
-            ),
-        ),
-        this.scalarCount(this.virtualAppointmentsQuery(undefined, ownerUserId)),
-      ]);
+              ),
+      ),
+      this.scalarCount(
+        ownerUserId
+          ? this.db
+              .select({ value: count() })
+              .from(listingInquiries)
+              .innerJoin(listings, eq(listingInquiries.listingId, listings.id))
+              .where(
+                and(
+                  eq(listings.ownerUserId, ownerUserId),
+                  eq(listingInquiries.status, InquiryStatus.OPEN),
+                  isNull(listingInquiries.firstRespondedAt),
+                  lte(listingInquiries.slaDueAt, now),
+                ),
+              )
+          : this.db
+              .select({ value: count() })
+              .from(listingInquiries)
+              .where(
+                and(
+                  eq(listingInquiries.status, InquiryStatus.OPEN),
+                  isNull(listingInquiries.firstRespondedAt),
+                  lte(listingInquiries.slaDueAt, now),
+                ),
+              ),
+      ),
+      this.scalarCount(
+        this.db
+          .select({ value: count() })
+          .from(listings)
+          .where(
+            ownerUserId
+              ? and(
+                  eq(listings.ownerUserId, ownerUserId),
+                  eq(listings.isPremium, true),
+                )
+              : eq(listings.isPremium, true),
+          ),
+      ),
+      this.scalarCount(this.virtualAppointmentsQuery(undefined, ownerUserId)),
+    ]);
 
     return {
       unassignedLeads,
@@ -636,7 +659,10 @@ export class StatsService {
     };
   }
 
-  private virtualAppointmentsQuery(requesterUserId?: string, ownerUserId?: string) {
+  private virtualAppointmentsQuery(
+    requesterUserId?: string,
+    ownerUserId?: string,
+  ) {
     const filters = [
       eq(listingAppointments.status, AppointmentStatus.CONFIRMED),
       eq(listingAppointments.modality, AppointmentModality.VIRTUAL),

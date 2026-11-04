@@ -5,11 +5,12 @@ import { DRIZZLE } from '@mykwatta/core/database';
 import type { DrizzleDb } from '@mykwatta/core/database';
 import { listingInquiries } from '@mykwatta/core/database/schema/inquiries.schema';
 import { listings } from '@mykwatta/core/database/schema/listings.schema';
-import {
-  OrganisationRole,
-} from '@mykwatta/modules/identity/constants';
+import { OrganisationRole } from '@mykwatta/modules/identity/constants';
 import { IdentityService } from '@mykwatta/modules/identity/services';
-import { InquiryStatus, leadSlaDueAt } from '@mykwatta/modules/listings/constants';
+import {
+  InquiryStatus,
+  leadSlaDueAt,
+} from '@mykwatta/modules/listings/constants';
 import type { AssignLeadDto } from '@mykwatta/modules/listings/dto';
 import { InquiriesService } from '@mykwatta/modules/listings/services/inquiries.service';
 

@@ -22,10 +22,7 @@ export const vendorCategoryEnum = pgEnum(
 
 export const vendorLeadStatusEnum = pgEnum(
   'vendor_lead_status',
-  Object.values(VendorLeadStatus) as [
-    VendorLeadStatus,
-    ...VendorLeadStatus[],
-  ],
+  Object.values(VendorLeadStatus) as [VendorLeadStatus, ...VendorLeadStatus[]],
 );
 
 export const vendors = pgTable(

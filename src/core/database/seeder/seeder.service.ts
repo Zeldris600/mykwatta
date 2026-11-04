@@ -208,8 +208,7 @@ export class SeederService {
         areaSqm: listing.areaSqm,
         ownerUserId: listing.ownerUserId,
         organisationId: listing.organisationId,
-        publishedAt:
-          listing.status === ListingStatus.PUBLISHED ? now : null,
+        publishedAt: listing.status === ListingStatus.PUBLISHED ? now : null,
         createdAt: now,
         updatedAt: now,
       })),

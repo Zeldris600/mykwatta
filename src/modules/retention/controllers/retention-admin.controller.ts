@@ -9,7 +9,9 @@ import { DocsVerificationAdminService } from '@mykwatta/modules/retention/servic
 @ApiBearerAuth()
 @Controller('admin')
 export class RetentionAdminController {
-  constructor(private readonly docsVerification: DocsVerificationAdminService) {}
+  constructor(
+    private readonly docsVerification: DocsVerificationAdminService,
+  ) {}
 
   @Patch('listings/:id/documents-verified')
   setDocumentsVerified(

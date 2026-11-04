@@ -165,9 +165,7 @@ export class DepositAvailabilityService {
       ),
       orderBy: [desc(payments.paidAt), desc(payments.createdAt)],
     });
-    return (
-      rows.find((row) => row.amountMinor >= requiredAmountMinor) ?? null
-    );
+    return rows.find((row) => row.amountMinor >= requiredAmountMinor) ?? null;
   }
 
   async findOpenDeposit(userId: string, listingId: string) {

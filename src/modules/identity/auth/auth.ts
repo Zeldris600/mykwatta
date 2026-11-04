@@ -9,12 +9,18 @@ import { enqueueOtp } from '@mykwatta/shared/twilio/otp.bridge';
 const client = postgres(process.env.DATABASE_URL!, { max: 5, prepare: false });
 const db = drizzle(client, { schema });
 
+const nodeEnv = process.env.NODE_ENV ?? 'development';
+const isDevOtpMode = nodeEnv === 'development' || nodeEnv === 'test';
+/** Fixed OTP for local/dev — never used when NODE_ENV is production/staging. */
+export const AUTH_DEV_OTP = (process.env.AUTH_DEV_OTP ?? '000000').trim();
+
 /**
  * Phone OTP auth via Better Auth.
  * - Login (existing users): Better Auth /phone-number/send-otp + /phone-number/verify
  * - Signup (new users): POST /api/identity/auth/signup with real email + name + phone + OTP
  *   (Better Auth's signUpOnVerification fakes email/name — we do not use it.)
  * - Interactive API reference (Scalar): GET /api/auth/reference
+ * - Dev/test: any send-otp accepts verify with AUTH_DEV_OTP (default `000000`)
  *
  * Env is validated by AppConfigModule before the app serves traffic.
  */
@@ -41,11 +47,17 @@ export const auth = betterAuth({
     bearer(),
     phoneNumber({
       sendOTP: ({ phoneNumber: to, code }) => {
-        void enqueueOtp(to, code).catch((error: unknown) => {
+        const otp = isDevOtpMode ? AUTH_DEV_OTP : code;
+        void enqueueOtp(to, otp).catch((error: unknown) => {
           const reason = error instanceof Error ? error.message : String(error);
           console.error(`[auth] OTP enqueue failed: ${reason}`);
         });
       },
+      ...(isDevOtpMode
+        ? {
+            verifyOTP: ({ code }: { code: string }) => code === AUTH_DEV_OTP,
+          }
+        : {}),
     }),
   ],
 }) as unknown as ReturnType<typeof betterAuth>;

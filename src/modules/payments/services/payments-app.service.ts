@@ -49,12 +49,9 @@ export class PaymentsAppService {
       );
 
       if (availability.status === DepositAvailabilityStatus.PAID) {
-        throw AppException.conflict(
-          availability.message,
-          {
-            depositAvailability: availability,
-          },
-        );
+        throw AppException.conflict(availability.message, {
+          depositAvailability: availability,
+        });
       }
 
       if (availability.status === DepositAvailabilityStatus.UNAVAILABLE) {

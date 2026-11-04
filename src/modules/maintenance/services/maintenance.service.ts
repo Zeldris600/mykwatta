@@ -202,8 +202,7 @@ export class MaintenanceService {
     }
     if (
       ticket &&
-      (ticket.createdByUserId === userId ||
-        ticket.assignedToUserId === userId)
+      (ticket.createdByUserId === userId || ticket.assignedToUserId === userId)
     ) {
       return;
     }

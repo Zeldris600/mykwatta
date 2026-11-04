@@ -153,10 +153,7 @@ export class EscrowService {
     if (personas.includes(Persona.PLATFORM_ADMIN)) {
       return;
     }
-    if (
-      ledger.beneficiaryUserId &&
-      ledger.beneficiaryUserId === actorUserId
-    ) {
+    if (ledger.beneficiaryUserId && ledger.beneficiaryUserId === actorUserId) {
       return;
     }
     throw AppException.forbidden(

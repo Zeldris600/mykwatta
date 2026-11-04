@@ -137,11 +137,11 @@ export class ListingsController {
 
   @Post(':id/premium/apply')
   @ApiBearerAuth()
-  async applyPremium(
-    @Param('id') id: string,
-    @Session() session: UserSession,
-  ) {
-    const listing = await this.listingsService.applyPremium(id, session.user.id);
+  async applyPremium(@Param('id') id: string, @Session() session: UserSession) {
+    const listing = await this.listingsService.applyPremium(
+      id,
+      session.user.id,
+    );
     const [withMedia] = await this.mediaService.attachMediaToListings([
       listing,
     ]);

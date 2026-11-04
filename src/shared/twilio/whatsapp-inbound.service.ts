@@ -107,7 +107,9 @@ export class WhatsappInboundService {
     const withoutPrefix = raw.replace(/^whatsapp:/i, '');
     const digits = normalizeWhatsappDialNumber(withoutPrefix);
     if (!digits) {
-      throw AppException.badRequest('Could not resolve sender phone from webhook');
+      throw AppException.badRequest(
+        'Could not resolve sender phone from webhook',
+      );
     }
     return `+${digits}`;
   }

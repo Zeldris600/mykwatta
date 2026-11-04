@@ -3,7 +3,10 @@ import type { DrizzleDb } from '@mykwatta/core/database';
 import { listingDeals } from '@mykwatta/core/database/schema/deals.schema';
 import { listings } from '@mykwatta/core/database/schema/listings.schema';
 import { DealStatus, DealType } from '@mykwatta/modules/deals/constants';
-import { ListingStatus, ListingType } from '@mykwatta/modules/listings/constants';
+import {
+  ListingStatus,
+  ListingType,
+} from '@mykwatta/modules/listings/constants';
 
 /**
  * Occupied rental units / total rentable units for an owner (published + under contract).
@@ -13,7 +16,10 @@ export async function computeOccupancyPercentForOwner(
   db: DrizzleDb,
   ownerUserId: string,
 ): Promise<number | null> {
-  const rentableStatuses = [ListingStatus.PUBLISHED, ListingStatus.UNDER_CONTRACT];
+  const rentableStatuses = [
+    ListingStatus.PUBLISHED,
+    ListingStatus.UNDER_CONTRACT,
+  ];
 
   const [totalRow] = await db
     .select({ value: count() })

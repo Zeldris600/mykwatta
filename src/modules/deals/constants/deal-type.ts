@@ -3,7 +3,4 @@ export enum DealType {
   SALE_AGREEMENT = 'SALE_AGREEMENT',
 }
 
-export const DEAL_TYPES = Object.values(DealType) as [
-  DealType,
-  ...DealType[],
-];
+export const DEAL_TYPES = Object.values(DealType) as [DealType, ...DealType[]];

@@ -25,6 +25,8 @@ export class LeadDigestScheduler implements OnModuleInit {
         },
       },
     );
-    this.logger.log('Lead digest repeatable job scheduled (daily 08:00 UTC cron)');
+    this.logger.log(
+      'Lead digest repeatable job scheduled (daily 08:00 UTC cron)',
+    );
   }
 }

@@ -129,7 +129,9 @@ export class SavedSearchesService {
       if (search.userId === listing.ownerUserId) {
         continue;
       }
-      if (!listingMatchesSavedSearch(listing, search.filters ?? {}, amenitySlugs)) {
+      if (
+        !listingMatchesSavedSearch(listing, search.filters ?? {}, amenitySlugs)
+      ) {
         continue;
       }
 
@@ -142,7 +144,10 @@ export class SavedSearchesService {
           notifiedAt: new Date(),
         })
         .onConflictDoNothing({
-          target: [savedSearchMatches.savedSearchId, savedSearchMatches.listingId],
+          target: [
+            savedSearchMatches.savedSearchId,
+            savedSearchMatches.listingId,
+          ],
         })
         .returning({ id: savedSearchMatches.id });
 
@@ -190,7 +195,10 @@ export class SavedSearchesService {
         eq(savedSearchMatches.savedSearchId, savedSearches.id),
       )
       .where(
-        and(eq(savedSearches.userId, userId), gte(savedSearchMatches.createdAt, since)),
+        and(
+          eq(savedSearches.userId, userId),
+          gte(savedSearchMatches.createdAt, since),
+        ),
       );
     return Number(row?.value ?? 0);
   }
@@ -199,7 +207,10 @@ export class SavedSearchesService {
     const rows = await this.db
       .select({ slug: amenityCatalog.slug })
       .from(listingAmenities)
-      .innerJoin(amenityCatalog, eq(amenityCatalog.id, listingAmenities.amenityId))
+      .innerJoin(
+        amenityCatalog,
+        eq(amenityCatalog.id, listingAmenities.amenityId),
+      )
       .where(eq(listingAmenities.listingId, listingId));
     return rows.map((row) => row.slug);
   }

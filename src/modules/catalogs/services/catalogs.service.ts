@@ -18,7 +18,10 @@ export class CatalogsService {
 
   async listAmenities() {
     await this.ensureSeeded();
-    return this.db.select().from(amenityCatalog).orderBy(asc(amenityCatalog.nameEn));
+    return this.db
+      .select()
+      .from(amenityCatalog)
+      .orderBy(asc(amenityCatalog.nameEn));
   }
 
   async listLandmarks() {

@@ -653,8 +653,9 @@ export class ListingsService {
         .select({ kind: listingMedia.kind })
         .from(listingMedia)
         .where(eq(listingMedia.listingId, id));
-      const photos = rows.filter((row) => row.kind === ListingMediaKind.PHOTO)
-        .length;
+      const photos = rows.filter(
+        (row) => row.kind === ListingMediaKind.PHOTO,
+      ).length;
       const floorPlans = rows.filter(
         (row) => row.kind === ListingMediaKind.FLOOR_PLAN,
       ).length;
@@ -723,7 +724,9 @@ export class ListingsService {
   ): Promise<string[]> {
     const normalized = [
       ...new Set(
-        slugs.map((slug) => slug.trim().toLowerCase()).filter((slug) => slug.length > 0),
+        slugs
+          .map((slug) => slug.trim().toLowerCase())
+          .filter((slug) => slug.length > 0),
       ),
     ];
     if (normalized.length === 0) {

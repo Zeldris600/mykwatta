@@ -1,8 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
-import {
-  ProfessionalKind,
-} from '@mykwatta/modules/directory/constants/professional-kind';
+import { ProfessionalKind } from '@mykwatta/modules/directory/constants/professional-kind';
 
 export class ListProfessionalsQueryDto {
   @ApiPropertyOptional({ example: 'Yaoundé' })

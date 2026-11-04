@@ -22,11 +22,7 @@ Content-Type: application/json
 { "phoneNumber": "+237670000004" }
 ```
 
-Local (`TWILIO_MODE=console`): read code from API **or** worker logs:
-
-```
-[console Twilio OTP] channel=whatsapp to=+237670000004 code=487919 …
-```
+Local (`NODE_ENV=development` / `test`): always use the fixed OTP **`000000`** (override with `AUTH_DEV_OTP`). Console/worker still logs that code.
 
 ### Step 2 — Verify
 
@@ -36,7 +32,7 @@ Content-Type: application/json
 
 {
   "phoneNumber": "+237670000004",
-  "code": "487919"
+  "code": "000000"
 }
 ```
 

@@ -13,10 +13,7 @@ import { listings } from './listings.schema';
 
 export const listingMediaKindEnum = pgEnum(
   'listing_media_kind',
-  Object.values(ListingMediaKind) as [
-    ListingMediaKind,
-    ...ListingMediaKind[],
-  ],
+  Object.values(ListingMediaKind) as [ListingMediaKind, ...ListingMediaKind[]],
 );
 
 export const listingMedia = pgTable(
