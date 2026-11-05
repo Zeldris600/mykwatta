@@ -33,7 +33,8 @@ async function bootstrap() {
   app.use(compression());
   app.enableShutdownHooks();
 
-  const authReferenceUrl = `${config.betterAuthUrl.replace(/\/$/, '')}/${APP_GLOBAL_PREFIX}/auth/reference`;
+  // Same host as Swagger. An absolute BETTER_AUTH_URL of localhost sends the browser off the server.
+  const authReferenceUrl = `/${APP_GLOBAL_PREFIX}/auth/reference`;
   const showDevOtp =
     config.nodeEnv === NodeEnvironment.Development ||
     config.nodeEnv === NodeEnvironment.Test;

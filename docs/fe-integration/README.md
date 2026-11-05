@@ -24,6 +24,7 @@ OpenAPI is the machine-readable contract. These guides add **product rules**, **
 | 5 | [05-notifications.md](./05-notifications.md) | Inbox, Pusher realtime, push devices, preferences |
 | 6 | [06-kyc.md](./06-kyc.md) | KYC submit + admin review (required before publish) |
 | 7 | [07-trust-geo-escrow.md](./07-trust-geo-escrow.md) | Home stats, map/quartier, trust badges, quotes/escrow, WA Continue, ops screens |
+| 8 | [08-demo-accounts.md](./08-demo-accounts.md) | Seeded phones, OTP `000000`, and what each demo user already has |
 
 ## Build order (recommended)
 
@@ -44,7 +45,9 @@ OpenAPI is the machine-readable contract. These guides add **product rules**, **
 
 ## Seeded demo data (local)
 
-OTP codes appear in API/worker logs: `[console Twilio OTP] … code=……` when `TWILIO_MODE=console`.
+Full login steps, OTP, and preloaded inquiries/payments: [08-demo-accounts.md](./08-demo-accounts.md).
+
+When `NODE_ENV` is `development` or `test`, every send-otp accepts **`000000`**.
 
 | Persona | Phone | Email |
 | --- | --- | --- |

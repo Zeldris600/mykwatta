@@ -24,6 +24,8 @@ Content-Type: application/json
 
 Local (`NODE_ENV=development` / `test`): always use the fixed OTP **`000000`** (override with `AUTH_DEV_OTP`). Console/worker still logs that code.
 
+Seeded phones and what each account already owns: [08-demo-accounts.md](./08-demo-accounts.md).
+
 ### Step 2 — Verify
 
 ```http
