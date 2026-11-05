@@ -29,7 +29,22 @@ async function bootstrap() {
     origin: config.corsOrigins,
     credentials: true,
   });
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+          // Better Auth Scalar reference: inline boot script + jsDelivr bundle.
+          // https://better-auth.com/docs/plugins/open-api
+          'script-src': [
+            "'self'",
+            "'unsafe-inline'",
+            'https://cdn.jsdelivr.net',
+          ],
+        },
+      },
+    }),
+  );
   app.use(compression());
   app.enableShutdownHooks();
 
