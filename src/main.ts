@@ -2,7 +2,6 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import compression from 'compression';
-import express from 'express';
 import helmet from 'helmet';
 import { AppModule } from '@mykwatta/app.module';
 import { APP_GLOBAL_PREFIX } from '@mykwatta/core/common/constants/app.constants';
@@ -10,19 +9,13 @@ import { ApiConfigService } from '@mykwatta/core/config';
 import { NodeEnvironment } from '@mykwatta/core/config/env.validation';
 
 async function bootstrap() {
-  // Required by Better Auth so it can parse its own request bodies.
+  // Better Auth reads /api/auth from the raw stream. AuthModule re-adds JSON
+  // parsing for every other route (see IdentityModule).
   const app = await NestFactory.create(AppModule, {
     bodyParser: false,
-    rawBody: true,
   });
 
   const config = app.get(ApiConfigService);
-
-  // Stripe signature verification needs the unmodified body bytes.
-  app.use(
-    `/${APP_GLOBAL_PREFIX}/webhooks/stripe`,
-    express.raw({ type: 'application/json' }),
-  );
 
   app.setGlobalPrefix(APP_GLOBAL_PREFIX);
   app.enableCors({
