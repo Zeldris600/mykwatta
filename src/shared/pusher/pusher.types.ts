@@ -18,6 +18,12 @@ export type NotificationRealtimePayload = {
   createdAt: string;
 };
 
+export type FeedPostRealtimePayload = {
+  feedPostId: string;
+  listingId: string;
+  publishedAt: string;
+};
+
 export type PusherChannelAuthResponse = {
   auth: string;
   channel_data?: string;
@@ -32,11 +38,19 @@ export type PusherClientConfig = {
   event: string;
 };
 
+export type PusherPublicFeedConfig = {
+  mode: string;
+  key: string | null;
+  cluster: string | null;
+  channel: string;
+  event: string;
+};
+
 export interface PusherProvider {
   trigger(
     channel: string,
     event: string,
-    data: NotificationRealtimePayload,
+    data: NotificationRealtimePayload | FeedPostRealtimePayload,
   ): Promise<void>;
   authorizeChannel(
     socketId: string,

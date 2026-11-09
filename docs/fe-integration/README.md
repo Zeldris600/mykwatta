@@ -25,6 +25,7 @@ OpenAPI is the machine-readable contract. These guides add **product rules**, **
 | 6 | [06-kyc.md](./06-kyc.md) | KYC submit + admin review (required before publish) |
 | 7 | [07-trust-geo-escrow.md](./07-trust-geo-escrow.md) | Home stats, map/quartier, trust badges, quotes/escrow, WA Continue, ops screens |
 | 8 | [08-demo-accounts.md](./08-demo-accounts.md) | Seeded phones, OTP `000000`, and what each demo user already has |
+| 9 | [09-feed.md](./09-feed.md) | Platform video feed, comments/likes/shares, profiles |
 
 ## Build order (recommended)
 
@@ -33,7 +34,7 @@ OpenAPI is the machine-readable contract. These guides add **product rules**, **
 2. Public browse + listing detail (+ saved flag)
 3. Notifications inbox + deep links (even if polling only)
 4. Inquiries + appointments
-5. KYC + owner listing create/publish/media
+5. KYC + owner listing create/publish/media (incl. VIDEO)
 6. Deposit payment (console complete locally)
 7. Applications + owner decide
 8. Deals complete/cancel
@@ -41,6 +42,7 @@ OpenAPI is the machine-readable contract. These guides add **product rules**, **
 10. Home stats + geo/quartier + trust badges (guide 07 A–C)
 11. Quotes/escrow + WhatsApp Continue CTAs (guide 07 D–E)
 12. Amenities/title/alerts → agency → comps/rent (guide 07 F–H)
+13. Video feed + profiles (guide 09)
 ```
 
 ## Seeded demo data (local)
@@ -57,12 +59,12 @@ When `NODE_ENV` is `development` or `test`, every send-otp accepts **`000000`**.
 | `RENTER` | `+237670000004` | `renter@mykwatta.local` |
 | `BUYER` | `+237670000005` | `buyer@mykwatta.local` |
 
-Published listings after seed: **Bastos** (RENT, Yaoundé) and **Bonanjo** (SALE, Douala). **Akwa** stays `DRAFT`.
+Published listings after seed: **Bastos** (RENT, Yaoundé) and **Bonanjo** (SALE, Douala) — both `VERIFIED` with VIDEO and on the feed. **Akwa** stays `DRAFT`.
 
 IDs (stable):
 
-- `seed_listing_bastos_rent`
-- `seed_listing_bonanjo_sale`
+- `seed_listing_bastos_rent` / `seed_feed_bastos`
+- `seed_listing_bonanjo_sale` / `seed_feed_bonanjo`
 - `seed_listing_akwa_draft`
 
 ## Product loops (happy paths)

@@ -76,9 +76,22 @@ export class ListingsService {
     @Inject(DRIZZLE) private readonly db: DrizzleDb,
     @InjectQueue(QueueName.SAVED_SEARCH_MATCH)
     private readonly savedSearchQueue: Queue,
+    @InjectQueue(QueueName.FEED_SYNC)
+    private readonly feedSyncQueue: Queue,
     private readonly identity: IdentityService,
     private readonly kyc: KycService,
   ) {}
+
+  /** Enqueue platform feed eligibility sync (publish / verify / media / freeze). */
+  enqueueFeedSync(listingId: string): void {
+    void this.feedSyncQueue
+      .add(QueueJobName.SYNC_FEED_POST, { listingId })
+      .catch((error: unknown) => {
+        this.logger.warn(
+          `feed sync enqueue failed listing=${listingId}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      });
+  }
 
   async create(ownerUserId: string, input: CreateListingDto) {
     try {
@@ -351,6 +364,7 @@ export class ListingsService {
             `saved search match enqueue failed listing=${id}: ${error instanceof Error ? error.message : String(error)}`,
           );
         });
+      this.enqueueFeedSync(id);
 
       return this.getById(id);
     } catch (error) {
@@ -381,6 +395,8 @@ export class ListingsService {
         .update(listings)
         .set({ status: ListingStatus.ARCHIVED })
         .where(eq(listings.id, id));
+
+      this.enqueueFeedSync(id);
 
       return this.getById(id);
     } catch (error) {

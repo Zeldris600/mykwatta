@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
 import type {
+  FeedPostRealtimePayload,
   NotificationRealtimePayload,
   PusherChannelAuthResponse,
   PusherProvider,
@@ -13,11 +14,17 @@ export class ConsolePusherProvider implements PusherProvider {
   trigger(
     channel: string,
     event: string,
-    data: NotificationRealtimePayload,
+    data: NotificationRealtimePayload | FeedPostRealtimePayload,
   ): Promise<void> {
-    this.logger.log(
-      `[console pusher] channel=${channel} event=${event} id=${data.id} type=${data.type} href=${data.metadata.href}`,
-    );
+    if ('type' in data) {
+      this.logger.log(
+        `[console pusher] channel=${channel} event=${event} id=${data.id} type=${data.type} href=${data.metadata.href}`,
+      );
+    } else {
+      this.logger.log(
+        `[console pusher] channel=${channel} event=${event} feedPostId=${data.feedPostId} listingId=${data.listingId}`,
+      );
+    }
     return Promise.resolve();
   }
 

@@ -8,11 +8,14 @@ import {
 import {
   AppointmentStatus,
   InquiryStatus,
+  ListingMediaKind,
   ListingStatus,
   ListingType,
+  ListingVerificationStatus,
   PropertyType,
   ReviewStatus,
 } from '@mykwatta/modules/listings/constants';
+import { FeedPostStatus } from '@mykwatta/modules/feed/constants';
 import {
   PaymentChannel,
   PaymentProviderName,
@@ -39,7 +42,13 @@ export const SeedIds = {
   },
   media: {
     bastosHero: 'seed_media_bastos_hero',
+    bastosVideo: 'seed_media_bastos_video',
     bonanjoHero: 'seed_media_bonanjo_hero',
+    bonanjoVideo: 'seed_media_bonanjo_video',
+  },
+  feedPosts: {
+    bastos: 'seed_feed_bastos',
+    bonanjo: 'seed_feed_bonanjo',
   },
   inquiries: {
     bastosOpen: 'seed_inquiry_bastos_open',
@@ -162,6 +171,7 @@ export const listings = [
     areaSqm: 85,
     ownerUserId: SeedIds.users.landlord,
     organisationId: null as string | null,
+    verificationStatus: ListingVerificationStatus.VERIFIED,
   },
   {
     id: SeedIds.listings.bonanjoSale,
@@ -185,6 +195,7 @@ export const listings = [
     areaSqm: 140,
     ownerUserId: SeedIds.users.agent,
     organisationId: SeedIds.org,
+    verificationStatus: ListingVerificationStatus.VERIFIED,
   },
   {
     id: SeedIds.listings.akwaDraft,
@@ -208,10 +219,11 @@ export const listings = [
     areaSqm: 28,
     ownerUserId: SeedIds.users.landlord,
     organisationId: null as string | null,
+    verificationStatus: ListingVerificationStatus.UNVERIFIED,
   },
 ] as const;
 
-/** Placeholder photos for published seed listings (console:// URLs in CONSOLE storage). */
+/** Placeholder photos/videos for published seed listings (console:// URLs in CONSOLE storage). */
 export const listingMedia = [
   {
     id: SeedIds.media.bastosHero,
@@ -220,6 +232,16 @@ export const listingMedia = [
     contentType: 'image/jpeg',
     sortOrder: 0,
     caption: 'Living room',
+    kind: ListingMediaKind.PHOTO,
+  },
+  {
+    id: SeedIds.media.bastosVideo,
+    listingId: SeedIds.listings.bastosRent,
+    objectKey: `listings/${SeedIds.listings.bastosRent}/seed-tour.mp4`,
+    contentType: 'video/mp4',
+    sortOrder: 1,
+    caption: 'Walkthrough',
+    kind: ListingMediaKind.VIDEO,
   },
   {
     id: SeedIds.media.bonanjoHero,
@@ -228,6 +250,32 @@ export const listingMedia = [
     contentType: 'image/jpeg',
     sortOrder: 0,
     caption: 'Open loft',
+    kind: ListingMediaKind.PHOTO,
+  },
+  {
+    id: SeedIds.media.bonanjoVideo,
+    listingId: SeedIds.listings.bonanjoSale,
+    objectKey: `listings/${SeedIds.listings.bonanjoSale}/seed-tour.mp4`,
+    contentType: 'video/mp4',
+    sortOrder: 1,
+    caption: 'Loft tour',
+    kind: ListingMediaKind.VIDEO,
+  },
+] as const;
+
+/** Platform-curated feed posts (VERIFIED + VIDEO published listings). */
+export const feedPosts = [
+  {
+    id: SeedIds.feedPosts.bastos,
+    listingId: SeedIds.listings.bastosRent,
+    videoMediaId: SeedIds.media.bastosVideo,
+    status: FeedPostStatus.ACTIVE,
+  },
+  {
+    id: SeedIds.feedPosts.bonanjo,
+    listingId: SeedIds.listings.bonanjoSale,
+    videoMediaId: SeedIds.media.bonanjoVideo,
+    status: FeedPostStatus.ACTIVE,
   },
 ] as const;
 

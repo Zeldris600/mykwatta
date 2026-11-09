@@ -18,6 +18,7 @@ import {
   userPersonas,
 } from '../schema/identity.schema';
 import { listingInquiries } from '../schema/inquiries.schema';
+import { feedPosts } from '../schema/feed.schema';
 import { listingMedia } from '../schema/listing-media.schema';
 import { listings } from '../schema/listings.schema';
 import { payments } from '../schema/payments.schema';
@@ -28,6 +29,7 @@ import { seedGeo } from './seed-geo';
 import {
   appointments,
   favorites,
+  feedPosts as feedPostFixtures,
   inquiries,
   invites,
   listingMedia as listingMediaFixtures,
@@ -208,6 +210,7 @@ export class SeederService {
         areaSqm: listing.areaSqm,
         ownerUserId: listing.ownerUserId,
         organisationId: listing.organisationId,
+        verificationStatus: listing.verificationStatus,
         publishedAt: listing.status === ListingStatus.PUBLISHED ? now : null,
         createdAt: now,
         updatedAt: now,
@@ -223,6 +226,21 @@ export class SeederService {
           contentType: media.contentType,
           sortOrder: media.sortOrder,
           caption: media.caption,
+          kind: media.kind,
+          createdAt: now,
+          updatedAt: now,
+        })),
+      );
+    }
+
+    if (feedPostFixtures.length > 0) {
+      await this.db.insert(feedPosts).values(
+        feedPostFixtures.map((post) => ({
+          id: post.id,
+          listingId: post.listingId,
+          videoMediaId: post.videoMediaId,
+          status: post.status,
+          publishedAt: now,
           createdAt: now,
           updatedAt: now,
         })),
@@ -331,7 +349,7 @@ export class SeederService {
     ).length;
     const drafts = listingFixtures.length - published;
     this.logger.log(
-      `Listings: ${published} PUBLISHED, ${drafts} DRAFT. Media: ${listingMediaFixtures.length}. Favorites: ${favorites.length}.`,
+      `Listings: ${published} PUBLISHED, ${drafts} DRAFT. Media: ${listingMediaFixtures.length}. Feed posts: ${feedPostFixtures.length}. Favorites: ${favorites.length}.`,
     );
   }
 }

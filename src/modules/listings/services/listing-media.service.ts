@@ -1,5 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { asc, count, eq, inArray, max } from 'drizzle-orm';
+import { InjectQueue } from '@nestjs/bullmq';
+import type { Queue } from 'bullmq';
+import { and, asc, count, eq, inArray, max } from 'drizzle-orm';
 import { memoryStorage } from 'multer';
 import type { Options as MulterOptions } from 'multer';
 import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
@@ -12,10 +14,14 @@ import {
   LISTING_MEDIA_MAX_BYTES,
   LISTING_MEDIA_MAX_PER_LISTING,
   LISTING_MEDIA_SIGNED_URL_TTL_SECONDS,
+  LISTING_VIDEO_ALLOWED_MIME_TYPES,
+  LISTING_VIDEO_MAX_BYTES,
+  LISTING_VIDEO_MAX_PER_LISTING,
   ListingMediaKind,
 } from '@mykwatta/modules/listings/constants';
 import type { UploadListingMediaDto } from '@mykwatta/modules/listings/dto';
 import { ListingsService } from '@mykwatta/modules/listings/services/listings.service';
+import { QueueJobName, QueueName } from '@mykwatta/shared/queue';
 import {
   assertUploadedFile,
   listingMediaObjectKey,
@@ -24,9 +30,10 @@ import {
   type UploadedFileLike,
 } from '@mykwatta/shared/storage';
 
+/** Multer limit uses the larger video cap; service enforces per-kind limits. */
 export const listingMediaMulterOptions: MulterOptions = {
   storage: memoryStorage(),
-  limits: { fileSize: LISTING_MEDIA_MAX_BYTES, files: 1 },
+  limits: { fileSize: LISTING_VIDEO_MAX_BYTES, files: 1 },
 };
 
 @Injectable()
@@ -35,6 +42,8 @@ export class ListingMediaService {
 
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDb,
+    @InjectQueue(QueueName.FEED_SYNC)
+    private readonly feedSyncQueue: Queue,
     private readonly listings: ListingsService,
     private readonly storage: StorageService,
   ) {}
@@ -54,11 +63,40 @@ export class ListingMediaService {
     try {
       await this.listings.assertUserCanManage(listingId, userId);
 
+      const kind = input.kind ?? ListingMediaKind.PHOTO;
+      const isVideo = kind === ListingMediaKind.VIDEO;
+      const maxBytes = isVideo
+        ? LISTING_VIDEO_MAX_BYTES
+        : LISTING_MEDIA_MAX_BYTES;
+      const allowedMimeTypes = isVideo
+        ? LISTING_VIDEO_ALLOWED_MIME_TYPES
+        : LISTING_MEDIA_ALLOWED_MIME_TYPES;
+
       const uploaded = assertUploadedFile(file, {
         field: 'file',
-        maxBytes: LISTING_MEDIA_MAX_BYTES,
-        allowedMimeTypes: LISTING_MEDIA_ALLOWED_MIME_TYPES,
+        maxBytes,
+        allowedMimeTypes,
       });
+
+      const contentType = uploaded.mimetype.trim().toLowerCase();
+      if (
+        isVideo &&
+        !(LISTING_VIDEO_ALLOWED_MIME_TYPES as readonly string[]).includes(
+          contentType,
+        )
+      ) {
+        throw AppException.badRequest(
+          'VIDEO kind requires video/mp4 or video/webm',
+        );
+      }
+      if (
+        !isVideo &&
+        (LISTING_VIDEO_ALLOWED_MIME_TYPES as readonly string[]).includes(
+          contentType,
+        )
+      ) {
+        throw AppException.badRequest('Video files must use kind=VIDEO');
+      }
 
       const [{ value: existingCount }] = await this.db
         .select({ value: count() })
@@ -67,8 +105,25 @@ export class ListingMediaService {
 
       if (Number(existingCount) >= LISTING_MEDIA_MAX_PER_LISTING) {
         throw AppException.badRequest(
-          `Listings may have at most ${LISTING_MEDIA_MAX_PER_LISTING} photos`,
+          `Listings may have at most ${LISTING_MEDIA_MAX_PER_LISTING} media items`,
         );
+      }
+
+      if (isVideo) {
+        const [{ value: videoCount }] = await this.db
+          .select({ value: count() })
+          .from(listingMedia)
+          .where(
+            and(
+              eq(listingMedia.listingId, listingId),
+              eq(listingMedia.kind, ListingMediaKind.VIDEO),
+            ),
+          );
+        if (Number(videoCount) >= LISTING_VIDEO_MAX_PER_LISTING) {
+          throw AppException.badRequest(
+            `Listings may have at most ${LISTING_VIDEO_MAX_PER_LISTING} videos`,
+          );
+        }
       }
 
       let sortOrder = input.sortOrder;
@@ -81,8 +136,6 @@ export class ListingMediaService {
       }
 
       const mediaId = createId();
-      const contentType = uploaded.mimetype.trim().toLowerCase();
-      const kind = input.kind ?? ListingMediaKind.PHOTO;
       const objectKey = listingMediaObjectKey({
         listingId,
         mediaId,
@@ -120,6 +173,10 @@ export class ListingMediaService {
           })
           .catch(() => undefined);
         throw error;
+      }
+
+      if (isVideo) {
+        this.enqueueFeedSync(listingId);
       }
 
       const row = await this.db.query.listingMedia.findFirst({
@@ -166,6 +223,10 @@ export class ListingMediaService {
           );
         });
 
+      if (row.kind === ListingMediaKind.VIDEO) {
+        this.enqueueFeedSync(listingId);
+      }
+
       return { deleted: true, id: mediaId };
     } catch (error) {
       if (error instanceof AppException) {
@@ -206,6 +267,16 @@ export class ListingMediaService {
       ...row,
       media: byListing.get(row.id) ?? [],
     }));
+  }
+
+  private enqueueFeedSync(listingId: string): void {
+    void this.feedSyncQueue
+      .add(QueueJobName.SYNC_FEED_POST, { listingId })
+      .catch((error: unknown) => {
+        this.logger.warn(
+          `feed sync enqueue failed listing=${listingId}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      });
   }
 
   private async loadMediaRows(listingId: string) {

@@ -235,6 +235,8 @@ POST   /api/listings/:listingId/media          # owner — multipart
 DELETE /api/listings/:listingId/media/:mediaId # owner
 ```
 
+Kinds: `PHOTO` (default) · `FLOOR_PLAN` · `VIDEO`.
+
 ### Upload
 
 ```http
@@ -245,11 +247,12 @@ Content-Type: multipart/form-data
 
 | Part | Required | Notes |
 | --- | --- | --- |
-| `file` | yes | jpeg / png / webp |
+| `file` | yes | Photos: jpeg / png / webp (max 8MB). Videos: mp4 / webm (max 50MB) |
+| `kind` | no | `PHOTO` (default), `FLOOR_PLAN`, or `VIDEO`. Videos **must** set `kind=VIDEO` |
 | `caption` | no | |
 | `sortOrder` | no | int ≥ 0 |
 
-Max **12** photos per listing. Publish requires **≥ 1**.
+Max **12** media items per listing; max **3** videos. Publish requires **≥ 1** media (any kind). Platform feed cards need ≥1 `VIDEO` + admin `VERIFIED` — see [09-feed.md](./09-feed.md).
 
 ---
 
