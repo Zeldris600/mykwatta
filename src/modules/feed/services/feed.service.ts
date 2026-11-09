@@ -90,9 +90,7 @@ export class FeedService {
     const page = rows.slice(0, limit);
     const cards = await this.enrichPosts(page, viewerUserId);
     const nextCursor =
-      rows.length > limit
-        ? this.encodeCursor(page[page.length - 1]!)
-        : null;
+      rows.length > limit ? this.encodeCursor(page[page.length - 1]) : null;
 
     return {
       data: cards,
@@ -161,10 +159,7 @@ export class FeedService {
         limit: query.limit,
         offset,
       }),
-      this.db
-        .select({ value: count() })
-        .from(feedComments)
-        .where(whereClause),
+      this.db.select({ value: count() }).from(feedComments).where(whereClause),
     ]);
 
     const items = await this.enrichComments(rows, viewerUserId, true);
@@ -201,10 +196,7 @@ export class FeedService {
         limit: query.limit,
         offset,
       }),
-      this.db
-        .select({ value: count() })
-        .from(feedComments)
-        .where(whereClause),
+      this.db.select({ value: count() }).from(feedComments).where(whereClause),
     ]);
 
     const items = await this.enrichComments(rows, viewerUserId, false);
@@ -464,9 +456,7 @@ export class FeedService {
     const page = joined.slice(0, limit).map((row) => row.post);
     const cards = await this.enrichPosts(page, viewerUserId);
     const nextCursor =
-      joined.length > limit
-        ? this.encodeCursor(page[page.length - 1]!)
-        : null;
+      joined.length > limit ? this.encodeCursor(page[page.length - 1]) : null;
 
     return {
       data: cards,
@@ -508,9 +498,7 @@ export class FeedService {
     });
     const listingById = new Map(listingRows.map((row) => [row.id, row]));
 
-    const ownerIds = [
-      ...new Set(listingRows.map((row) => row.ownerUserId)),
-    ];
+    const ownerIds = [...new Set(listingRows.map((row) => row.ownerUserId))];
     const orgIds = [
       ...new Set(
         listingRows
@@ -568,9 +556,8 @@ export class FeedService {
     ]);
 
     const ownerById = new Map(owners.map((row) => [row.id, row] as const));
-    const orgById = new Map(
-      (orgs as OrgSnippet[]).map((row) => [row.id, row] as const),
-    );    const likedSet = new Set(likedRows.map((row) => row.feedPostId));
+    const orgById = new Map(orgs.map((row) => [row.id, row] as const));
+    const likedSet = new Set(likedRows.map((row) => row.feedPostId));
     const savedSet = new Set(savedRows.map((row) => row.listingId));
 
     const mediaByListing = new Map<string, typeof mediaRows>();
@@ -630,8 +617,7 @@ export class FeedService {
             neighborhood: listing.neighborhood,
             verificationStatus: listing.verificationStatus,
             listingVerified:
-              listing.verificationStatus ===
-              ListingVerificationStatus.VERIFIED,
+              listing.verificationStatus === ListingVerificationStatus.VERIFIED,
             isPremium: listing.isPremium,
           },
           video: {
@@ -687,7 +673,7 @@ export class FeedService {
             ),
             columns: { commentId: true },
           })
-        : Promise.resolve([]),
+        : Promise.resolve([] as Array<{ commentId: string }>),
       includeReplyCount
         ? this.db
             .select({
@@ -707,14 +693,16 @@ export class FeedService {
           ),
     ]);
 
-    const authorById = new Map(authors.map((row) => [row.id, row]));
+    const authorById = new Map(authors.map((row) => [row.id, row] as const));
     const likedSet = new Set(likedRows.map((row) => row.commentId));
     const replyCountByParent = new Map(
       replyCounts
-        .filter((row) => row.parentCommentId != null)
-        .map((row) => [row.parentCommentId!, Number(row.value)]),
+        .filter(
+          (row): row is { parentCommentId: string; value: number } =>
+            row.parentCommentId != null,
+        )
+        .map((row) => [row.parentCommentId, Number(row.value)] as const),
     );
-
     return rows.map((row) => {
       const author = authorById.get(row.authorUserId);
       return {
