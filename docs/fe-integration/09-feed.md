@@ -1,6 +1,6 @@
 # 09 — Video feed (platform-curated)
 
-TikTok-style vertical feed of **Mykwatta-verified** listing videos. Owners only upload video; they do **not** create posts. The platform activates a feed post when a listing is `PUBLISHED` + `verificationStatus=VERIFIED` + has ≥1 `VIDEO` media (and is not trust-frozen / duplicate).
+TikTok-style vertical feed of **Mykwatta-verified** listings (photos and/or video). Owners upload media; they do **not** create posts. The platform activates a feed post when a listing is `PUBLISHED` + `verificationStatus=VERIFIED` + has ≥1 `PHOTO` or ≥1 `VIDEO` (and is not trust-frozen / duplicate).
 
 Bookmarks reuse saved listings (`POST /listings/:id/save`).
 
@@ -12,7 +12,7 @@ Bookmarks reuse saved listings (`POST /listings/:id/save`).
 | --- | --- |
 | Who posts | Platform only (sync job). No `POST /feed` create endpoint. |
 | Eligibility | `PUBLISHED` ∧ `VERIFIED` ∧ not frozen ∧ not duplicate ∧ ≥1 `VIDEO` |
-| Video | `mp4` / `webm`, max 50MB, max 3 videos / listing. Poster = first `PHOTO`. |
+| Media | Optional `video` (`mp4` / `webm`) + `photos[]` gallery. Photo-only posts have `video: null`. Poster = first photo. |
 | Comments | Max depth **2** (root + replies). No reply-to-reply. |
 | Likes | Post likes and comment likes are separate toggles. |
 | Shares | `POST …/share` records an event and returns `shareUrl` for the native share sheet. |
@@ -87,6 +87,13 @@ Auth optional. When signed in, `liked` and `bookmarked` reflect the viewer.
         "url": "console://…",
         "contentType": "image/jpeg"
       },
+      "photos": [
+        {
+          "mediaId": "seed_media_bastos_hero",
+          "url": "console://…",
+          "contentType": "image/jpeg"
+        }
+      ],
       "owner": {
         "id": "seed_user_landlord",
         "name": "…",
@@ -103,6 +110,8 @@ Auth optional. When signed in, `liked` and `bookmarked` reflect the viewer.
 ```
 
 **Cursor:** opaque `publishedAtIso|id`. Pass `meta.nextCursor` as `cursor` for the next page. Do not use offset pagination.
+
+**Gallery:** use `photos[]` for swipeable listing photos. Show the video player only when `video` is non-null. `poster` mirrors `photos[0]` when present.
 
 ---
 
@@ -207,7 +216,7 @@ Photos stay `jpeg`/`png`/`webp`, max 8MB. Videos max **50MB**, max **3** per lis
 ## Checklist
 
 - [ ] Vertical pager uses `GET /feed` + `meta.nextCursor`
-- [ ] Video player uses `video.url`; poster uses `poster.url` (refresh on expiry)
+- [ ] Swipe gallery uses `photos[]`; video player when `video` is set (photo-only OK)
 - [ ] Like / comment / share / bookmark wired; bookmark via listing save
 - [ ] Comment sheet: roots → expand replies; reject nesting beyond depth 2 in UI
 - [ ] Profile taps navigate to `/profiles/users|organisations/…`

@@ -26,7 +26,7 @@ export class FeedSyncService {
 
   /**
    * Platform-only publish gate: ACTIVE feed post iff listing is PUBLISHED,
-   * VERIFIED, not frozen/duplicate, and has ≥1 VIDEO.
+   * VERIFIED, not frozen/duplicate, and has ≥1 PHOTO or ≥1 VIDEO.
    */
   async syncListing(listingId: string): Promise<void> {
     try {
@@ -46,25 +46,35 @@ export class FeedSyncService {
         orderBy: [asc(listingMedia.sortOrder), asc(listingMedia.createdAt)],
       });
 
+      const photo = await this.db.query.listingMedia.findFirst({
+        where: and(
+          eq(listingMedia.listingId, listingId),
+          eq(listingMedia.kind, ListingMediaKind.PHOTO),
+        ),
+        orderBy: [asc(listingMedia.sortOrder), asc(listingMedia.createdAt)],
+      });
+
       const eligible =
         listing.status === ListingStatus.PUBLISHED &&
         listing.verificationStatus === ListingVerificationStatus.VERIFIED &&
         listing.trustFrozenAt == null &&
         listing.duplicateOfListingId == null &&
-        video != null;
+        (video != null || photo != null);
 
       const existing = await this.db.query.feedPosts.findFirst({
         where: eq(feedPosts.listingId, listingId),
       });
 
-      if (eligible && video) {
+      if (eligible) {
+        const videoMediaId = video?.id ?? null;
+
         if (!existing) {
           const id = createId();
           const publishedAt = new Date();
           await this.db.insert(feedPosts).values({
             id,
             listingId,
-            videoMediaId: video.id,
+            videoMediaId,
             status: FeedPostStatus.ACTIVE,
             publishedAt,
           });
@@ -82,7 +92,7 @@ export class FeedSyncService {
         await this.db
           .update(feedPosts)
           .set({
-            videoMediaId: video.id,
+            videoMediaId,
             status: FeedPostStatus.ACTIVE,
             ...(wasHidden ? { publishedAt } : {}),
           })

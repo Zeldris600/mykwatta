@@ -490,7 +490,9 @@ export class FeedService {
     }
 
     const listingIds = posts.map((post) => post.listingId);
-    const videoIds = posts.map((post) => post.videoMediaId);
+    const videoIds = posts
+      .map((post) => post.videoMediaId)
+      .filter((id): id is string => id != null);
     const postIds = posts.map((post) => post.id);
 
     const listingRows = await this.db.query.listings.findMany({
@@ -584,16 +586,23 @@ export class FeedService {
           ? orgById.get(listing.organisationId)
           : undefined;
         const listingMediaRows = mediaByListing.get(listing.id) ?? [];
-        const posterRow = listingMediaRows.find(
+        const photoRows = listingMediaRows.filter(
           (row) => row.kind === ListingMediaKind.PHOTO,
         );
-        const poster = posterRow
-          ? (await this.signMedia([posterRow]))[0]
-          : null;
-        const video = videoById.get(post.videoMediaId);
-        if (!video) {
+        const signedPhotos = await this.signMedia(photoRows);
+        const photos = signedPhotos.map((item) => ({
+          mediaId: item.id,
+          url: item.url,
+          contentType: item.contentType,
+        }));
+        const poster = photos[0] ?? null;
+        const videoRow =
+          post.videoMediaId != null
+            ? videoById.get(post.videoMediaId)
+            : undefined;
+        if (!videoRow && photos.length === 0) {
           throw AppException.database(
-            `Feed post ${post.id} missing video media`,
+            `Feed post ${post.id} has no video or photos`,
           );
         }
 
@@ -620,18 +629,15 @@ export class FeedService {
               listing.verificationStatus === ListingVerificationStatus.VERIFIED,
             isPremium: listing.isPremium,
           },
-          video: {
-            mediaId: video.id,
-            url: video.url,
-            contentType: video.contentType,
-          },
-          poster: poster
+          video: videoRow
             ? {
-                mediaId: poster.id,
-                url: poster.url,
-                contentType: poster.contentType,
+                mediaId: videoRow.id,
+                url: videoRow.url,
+                contentType: videoRow.contentType,
               }
             : null,
+          poster,
+          photos,
           owner: owner
             ? { id: owner.id, name: owner.name, image: owner.image }
             : { id: listing.ownerUserId, name: 'Owner', image: null },

@@ -20,10 +20,10 @@ Money is always integer **minor units** (`priceMinor`) with `currency` (e.g. `XA
 | --- | --- |
 | Who posts | **Mykwatta only.** There is no user “create post” endpoint. |
 | What owners do | Upload listing media (`PHOTO` / `VIDEO`). Publish the listing. Wait for platform verification. |
-| Feed eligibility | Listing must be `PUBLISHED` **and** `verificationStatus = VERIFIED` **and** not trust-frozen **and** not marked duplicate **and** have ≥1 `VIDEO` media. |
-| If verified without video | No feed card until a `VIDEO` is uploaded; sync then activates the post. |
-| If later ineligible | Existing post is set `HIDDEN` (unverify, archive, freeze, duplicate, last video removed). |
-| Video delivery | Raw `video/mp4` or `video/webm` stored as-is. Signed playback URL. Poster = first `PHOTO`. No HLS transcoder. |
+| Feed eligibility | Listing must be `PUBLISHED` **and** `verificationStatus = VERIFIED` **and** not trust-frozen **and** not marked duplicate **and** have ≥1 `PHOTO` **or** ≥1 `VIDEO`. |
+| Photo-only listings | Allowed. Sync activates a feed post with `video: null` and a `photos[]` gallery. |
+| If later ineligible | Existing post is set `HIDDEN` (unverify, archive, freeze, duplicate, or all photos **and** videos removed). |
+| Media on a card | `video` may be null. Always include `photos[]` (listing `PHOTO`s in sort order). `poster` = first photo (`photos[0]`). FE: photo carousel and/or video player. Raw `mp4`/`webm` when present, signed URLs, no HLS. |
 | Bookmarks | Reuse listing save APIs. Feed cards expose `bookmarked`. |
 | Comments | Nested threads, **max depth 2** (root + one level of replies). No reply-to-reply. No comment editing in MVP. |
 | Likes | Post likes and comment likes are separate toggles. No like notifications. |
@@ -35,10 +35,10 @@ Money is always integer **minor units** (`priceMinor`) with `currency` (e.g. `XA
 ```
 1. Owner: KYC approved
 2. Owner: POST /api/listings (draft)
-3. Owner: POST /api/listings/:id/media  (PHOTO + VIDEO)
+3. Owner: POST /api/listings/:id/media  (PHOTO and/or VIDEO)
 4. Owner: POST /api/listings/:id/publish
 5. Admin: PATCH /api/admin/listings/:id/verification  { "status": "VERIFIED" }
-6. Platform sync creates/activates feed post
+6. Platform sync creates/activates feed post (photo-only or with video)
 7. FE: GET /api/feed  (or Pusher public-feed event → GET /api/feed/:feedPostId)
 ```
 
@@ -121,6 +121,13 @@ Only `ACTIVE` posts are returned.
         "url": "console://mykwatta-listings/…?expires=3600",
         "contentType": "image/jpeg"
       },
+      "photos": [
+        {
+          "mediaId": "seed_media_bastos_hero",
+          "url": "console://mykwatta-listings/…?expires=3600",
+          "contentType": "image/jpeg"
+        }
+      ],
       "owner": {
         "id": "seed_user_landlord",
         "name": "Landlord Demo",
@@ -138,7 +145,7 @@ Only `ACTIVE` posts are returned.
 
 **Pagination:** use keyset cursor only. When `meta.nextCursor` is non-null, pass it as `cursor` for the next page. Do not use offset/`page` on the feed list.
 
-**Media URLs:** `video.url` and `poster.url` are short-lived signed URLs (TTL **3600s**). Re-fetch the card or feed when they expire. `poster` may be `null` if the listing has no `PHOTO`.
+**Media URLs:** `video?.url`, `poster.url`, and every `photos[].url` are short-lived signed URLs (TTL **3600s**). Re-fetch the card or feed when they expire. `video` is `null` for photo-only posts. `photos` is always an array (may be empty only if a video exists). `poster` is `photos[0]` or `null`. FE should support a horizontal swipe / gallery over `photos`, and a video player when `video` is present.
 
 **Organisation on card** (when the listing belongs to an agency):
 
@@ -411,9 +418,9 @@ Content-Type: multipart/form-data
 
 Video MIME without `kind=VIDEO` is rejected. Non-video MIME with `kind=VIDEO` is rejected.
 
-Deleting the last video on an eligible listing hides its feed post (async sync). Uploading a video after verification activates/updates the feed post (async sync).
+Uploading or deleting `PHOTO`/`VIDEO` after verification re-runs feed sync. Removing the last photo **and** last video hides the post.
 
-Publish still requires ≥1 media of any kind (plus approved KYC). Feed visibility additionally requires `VIDEO` + admin `VERIFIED`.
+Publish still requires ≥1 media of any kind (plus approved KYC). Feed visibility additionally requires admin `VERIFIED` plus ≥1 photo or video.
 
 ### Admin verification (platform)
 
@@ -561,7 +568,7 @@ GET /api/feed
 ## 11. FE checklist
 
 - [ ] Vertical pager loads `GET /api/feed` and advances with `meta.nextCursor`
-- [ ] Player uses `video.url`; poster uses `poster?.url`; refresh card on signed-URL expiry
+- [ ] Gallery swipes `photos[]`; play `video` when non-null (photo-only cards are valid); refresh on signed-URL expiry
 - [ ] Optional auth: anonymous can browse; signed-in sees `liked` / `bookmarked`
 - [ ] Post like toggle; comment roots → expand replies; comment like; depth capped at 2 in UI
 - [ ] Share uses `shareUrl` from `POST …/share`

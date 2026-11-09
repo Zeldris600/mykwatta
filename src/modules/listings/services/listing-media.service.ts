@@ -175,7 +175,7 @@ export class ListingMediaService {
         throw error;
       }
 
-      if (isVideo) {
+      if (isVideo || kind === ListingMediaKind.PHOTO) {
         this.enqueueFeedSync(listingId);
       }
 
@@ -223,7 +223,10 @@ export class ListingMediaService {
           );
         });
 
-      if (row.kind === ListingMediaKind.VIDEO) {
+      if (
+        row.kind === ListingMediaKind.VIDEO ||
+        row.kind === ListingMediaKind.PHOTO
+      ) {
         this.enqueueFeedSync(listingId);
       }
 

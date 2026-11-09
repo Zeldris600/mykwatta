@@ -35,9 +35,10 @@ export const feedPosts = pgTable(
     listingId: text('listing_id')
       .notNull()
       .references(() => listings.id, { onDelete: 'cascade' }),
-    videoMediaId: text('video_media_id')
-      .notNull()
-      .references(() => listingMedia.id, { onDelete: 'restrict' }),
+    /** Null when the feed post is photo-only (no listing VIDEO). */
+    videoMediaId: text('video_media_id').references(() => listingMedia.id, {
+      onDelete: 'restrict',
+    }),
     status: feedPostStatusEnum('status')
       .notNull()
       .default(FeedPostStatus.ACTIVE),

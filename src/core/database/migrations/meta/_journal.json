@@ -134,6 +134,13 @@
       "when": 1793800000000,
       "tag": "0018_feed",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793801000000,
+      "tag": "0019_feed_photo_only",
+      "breakpoints": true
     }
   ]
 }
