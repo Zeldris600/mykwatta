@@ -12,7 +12,7 @@ export function socialBearerRedirect() {
       after: [
         {
           matcher: () => true,
-          handler: createAuthMiddleware(async (ctx) => {
+          handler: createAuthMiddleware((ctx) => {
             const token =
               ctx.context.responseHeaders?.get('set-auth-token') ?? undefined;
             const location =

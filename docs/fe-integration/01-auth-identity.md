@@ -4,6 +4,7 @@
 
 - **Login** = Better Auth phone OTP (`/api/auth/phone-number/*`)
 - **Signup** = send OTP via Better Auth, then **our** `POST /api/identity/auth/signup` (real email + name + personas)
+- **Google** = optional social path — [10-social-signin.md](./10-social-signin.md)
 - **Session** = opaque token → send as `Authorization: Bearer <token>`
 - **Personas** = account capabilities (many allowed). **Organisations** = optional agency layer (never required for renters)
 

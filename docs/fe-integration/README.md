@@ -18,6 +18,7 @@ OpenAPI is the machine-readable contract. These guides add **product rules**, **
 | --- | --- | --- |
 | 0 | [00-conventions.md](./00-conventions.md) | Envelope, errors, money, enums, HTTP client setup |
 | 1 | [01-auth-identity.md](./01-auth-identity.md) | Phone OTP login/signup, session token, personas, orgs |
+| 10 | [10-social-signin.md](./10-social-signin.md) | Google OAuth sign-in/up, `set-auth-token` on redirect, personas |
 | 2 | [02-listings.md](./02-listings.md) | Discovery filters, listing CRUD, media, publish, saved |
 | 3 | [03-engagement.md](./03-engagement.md) | Inquiries → appointments → reviews |
 | 4 | [04-payments-applications-deals.md](./04-payments-applications-deals.md) | Deposit → apply/offer → deal lifecycle |
