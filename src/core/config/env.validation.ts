@@ -105,6 +105,23 @@ class EnvironmentVariables {
   @IsUrl({ require_tld: false })
   BETTER_AUTH_URL!: string;
 
+  /** Google OAuth — both required to enable "Continue with Google". */
+  @ValidateIf(
+    (env: EnvironmentVariables) =>
+      Boolean(env.GOOGLE_CLIENT_ID) || Boolean(env.GOOGLE_CLIENT_SECRET),
+  )
+  @IsString()
+  @MinLength(1)
+  GOOGLE_CLIENT_ID?: string;
+
+  @ValidateIf(
+    (env: EnvironmentVariables) =>
+      Boolean(env.GOOGLE_CLIENT_ID) || Boolean(env.GOOGLE_CLIENT_SECRET),
+  )
+  @IsString()
+  @MinLength(1)
+  GOOGLE_CLIENT_SECRET?: string;
+
   /**
    * HTTP Basic Auth for `/api/docs` (+ OpenAPI JSON) and `/api/auth/reference`.
    * Required in staging/production. Optional in development/test (docs stay open if unset).

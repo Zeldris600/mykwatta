@@ -4,7 +4,10 @@ import { bearer, openAPI, phoneNumber } from 'better-auth/plugins';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '@mykwatta/core/database/schema';
+import { createId } from '@mykwatta/core/common/utils/uuid.util';
+import { Persona } from '@mykwatta/modules/identity/constants/personas';
 import { requireEnv } from '@mykwatta/modules/identity/auth/require-env';
+import { socialBearerRedirect } from '@mykwatta/modules/identity/auth/social-bearer-redirect';
 import { enqueueOtp } from '@mykwatta/shared/twilio/otp.bridge';
 
 const env = requireEnv([
@@ -15,6 +18,10 @@ const env = requireEnv([
   'CORS_ORIGIN',
 ]);
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+const googleEnabled = Boolean(googleClientId && googleClientSecret);
+
 const client = postgres(env.DATABASE_URL, { max: 5, prepare: false });
 const db = drizzle(client, { schema });
 
@@ -24,10 +31,10 @@ const isDevOtpMode = nodeEnv === 'development' || nodeEnv === 'test';
 export const AUTH_DEV_OTP = (process.env.AUTH_DEV_OTP ?? '000000').trim();
 
 /**
- * Phone OTP auth via Better Auth.
- * - Login (existing users): Better Auth /phone-number/send-otp + /phone-number/verify
- * - Signup (new users): POST /api/identity/auth/signup with real email + name + phone + OTP
- *   (Better Auth's signUpOnVerification fakes email/name — we do not use it.)
+ * Auth via Better Auth.
+ * - Phone OTP login: /phone-number/send-otp + /phone-number/verify
+ * - Phone signup: POST /api/identity/auth/signup (real email + name + personas)
+ * - Google OAuth: /sign-in/social (when GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET are set)
  * - Interactive API reference (Scalar): GET /api/auth/reference
  * - Dev/test: any send-otp accepts verify with AUTH_DEV_OTP (default `000000`)
  *
@@ -49,10 +56,49 @@ export const auth = betterAuth({
   trustedOrigins: env.CORS_ORIGIN.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean),
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ['google'],
+    },
+  },
+  socialProviders: googleEnabled
+    ? {
+        google: {
+          clientId: googleClientId!,
+          clientSecret: googleClientSecret!,
+          prompt: 'select_account',
+        },
+      }
+    : {},
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          // Google (and any other social) sign-up has no persona picker yet —
+          // default RENTER; phone signup replaces this via replacePersonas.
+          try {
+            await db.insert(schema.userPersonas).values({
+              id: createId(),
+              userId: user.id,
+              persona: Persona.RENTER,
+            });
+          } catch (error) {
+            const reason =
+              error instanceof Error ? error.message : String(error);
+            console.error(
+              `[auth] Failed to seed default persona for ${user.id}: ${reason}`,
+            );
+          }
+        },
+      },
+    },
+  },
   plugins: [
     openAPI(),
-    /** Exposes session as `set-auth-token` + accepts `Authorization: Bearer <token>` (Swagger / mobile). */
+    // After-hooks run in registration order: bearer sets set-auth-token, then we append it to Location.
     bearer(),
+    socialBearerRedirect(),
     phoneNumber({
       sendOTP: ({ phoneNumber: to, code }) => {
         const otp = isDevOtpMode ? AUTH_DEV_OTP : code;

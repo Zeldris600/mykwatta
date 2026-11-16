@@ -9,6 +9,9 @@ services:
     env_file:
       - .env
     command: ['node', 'dist/src/main.js']
+    networks:
+      - default
+      - dokploy-network
 
   worker:
     image: ${MYKWATTA_IMAGE:-ghcr.io/zeldris600/mykwatta:staging}
@@ -21,3 +24,11 @@ services:
     depends_on:
       - api
     command: ['node', 'dist/src/worker.js']
+    networks:
+      - default
+      - dokploy-network
+
+# Shared Redis/Postgres on Dokploy live here — worker must join too (not only api).
+networks:
+  dokploy-network:
+    external: true

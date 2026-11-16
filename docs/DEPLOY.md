@@ -58,6 +58,8 @@ Copy from `.env.example`. At minimum the API/worker **will not boot** without:
 | `REDIS_URL` | Shared Redis URL |
 | `BETTER_AUTH_SECRET` | long random secret |
 | `BETTER_AUTH_URL` | same public API origin as `APP_URL` |
+| `GOOGLE_CLIENT_ID` | optional — Google OAuth (with secret) |
+| `GOOGLE_CLIENT_SECRET` | optional — Google OAuth (with id); redirect `{BETTER_AUTH_URL}/api/auth/callback/google` |
 | `SWAGGER_USER` | Basic Auth user for `/api/docs` + `/api/auth/reference` |
 | `SWAGGER_PASSWORD` | Basic Auth password (min 8 chars) |
 | `TWILIO_MODE` | `console` or `live` |

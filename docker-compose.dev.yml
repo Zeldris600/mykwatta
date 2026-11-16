@@ -65,6 +65,9 @@ services:
       rustfs:
         condition: service_healthy
     command: ['pnpm', 'run', 'start:dev']
+    networks:
+      - default
+      - dokploy-network
 
   worker:
     build:
@@ -83,8 +86,18 @@ services:
       api:
         condition: service_started
     command: ['pnpm', 'run', 'start:worker:dev']
+    networks:
+      - default
+      - dokploy-network
 
 volumes:
   postgres_data:
   rustfs_data:
   rustfs_logs:
+
+# Shared Redis on Dokploy — worker must join too (not only api).
+# Local without Dokploy: docker network create dokploy-network
+networks:
+  dokploy-network:
+    external: true
+
