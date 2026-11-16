@@ -5,6 +5,7 @@ import compression from 'compression';
 import helmet from 'helmet';
 import { AppModule } from '@mykwatta/app.module';
 import { APP_GLOBAL_PREFIX } from '@mykwatta/core/common/constants/app.constants';
+import { createDocsBasicAuthMiddleware } from '@mykwatta/core/common/middleware/docs-basic-auth.middleware';
 import { ApiConfigService } from '@mykwatta/core/config';
 import { NodeEnvironment } from '@mykwatta/core/config/env.validation';
 
@@ -40,6 +41,19 @@ async function bootstrap() {
   );
   app.use(compression());
   app.enableShutdownHooks();
+
+  const docsAuth = config.swaggerBasicAuth;
+  if (docsAuth) {
+    const basicAuth = createDocsBasicAuthMiddleware(
+      docsAuth.user,
+      docsAuth.password,
+    );
+    // Swagger UI + OpenAPI JSON/YAML, and Better Auth Scalar reference.
+    app.use('/api/docs', basicAuth);
+    app.use('/api/docs-json', basicAuth);
+    app.use('/api/docs-yaml', basicAuth);
+    app.use(`/${APP_GLOBAL_PREFIX}/auth/reference`, basicAuth);
+  }
 
   // Same host as Swagger. An absolute BETTER_AUTH_URL of localhost sends the browser off the server.
   const authReferenceUrl = `/${APP_GLOBAL_PREFIX}/auth/reference`;

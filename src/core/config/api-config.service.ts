@@ -76,6 +76,16 @@ export class ApiConfigService {
     return this.configService.getOrThrow<string>('betterAuth.url');
   }
 
+  /** Present when both SWAGGER_USER and SWAGGER_PASSWORD are set. */
+  get swaggerBasicAuth(): { user: string; password: string } | null {
+    const user = this.configService.get<string>('swagger.user')?.trim();
+    const password = this.configService.get<string>('swagger.password');
+    if (!user || !password) {
+      return null;
+    }
+    return { user, password };
+  }
+
   get twilioMode(): TwilioMode {
     return this.configService.getOrThrow<TwilioMode>('twilio.mode');
   }

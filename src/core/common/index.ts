@@ -8,6 +8,7 @@ export * from './interceptors/transform.interceptor';
 export * from './pipes/validation.pipe';
 export * from './request-context/request-context.middleware';
 export * from './request-context/request-context.service';
+export * from './middleware/docs-basic-auth.middleware';
 export * from './logger/logger.service';
 export * from './utils/uuid.util';
 export * from './utils/assert.util';

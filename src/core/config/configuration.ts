@@ -11,6 +11,10 @@ export default () => ({
     secret: process.env.BETTER_AUTH_SECRET,
     url: process.env.BETTER_AUTH_URL,
   },
+  swagger: {
+    user: process.env.SWAGGER_USER,
+    password: process.env.SWAGGER_PASSWORD,
+  },
   twilio: {
     mode: process.env.TWILIO_MODE,
     otpChannel: process.env.TWILIO_OTP_CHANNEL,

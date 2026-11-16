@@ -58,6 +58,8 @@ Copy from `.env.example`. At minimum the API/worker **will not boot** without:
 | `REDIS_URL` | Shared Redis URL |
 | `BETTER_AUTH_SECRET` | long random secret |
 | `BETTER_AUTH_URL` | same public API origin as `APP_URL` |
+| `SWAGGER_USER` | Basic Auth user for `/api/docs` + `/api/auth/reference` |
+| `SWAGGER_PASSWORD` | Basic Auth password (min 8 chars) |
 | `TWILIO_MODE` | `console` or `live` |
 | `TWILIO_OTP_CHANNEL` | `whatsapp` |
 | `MAIL_PROVIDER` | `CONSOLE` |
