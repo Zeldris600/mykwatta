@@ -18,14 +18,14 @@ export function socialBearerRedirect() {
             const location =
               ctx.context.responseHeaders?.get('location') ?? undefined;
             if (!token || !location) {
-              return;
+              return Promise.resolve();
             }
 
             let url: URL;
             try {
               url = new URL(location);
             } catch {
-              return;
+              return Promise.resolve();
             }
 
             // sign-in/social may also set Location to Google's authorize URL — leave it alone.
@@ -33,11 +33,12 @@ export function socialBearerRedirect() {
               url.hostname.endsWith('google.com') ||
               url.hostname.endsWith('googleusercontent.com')
             ) {
-              return;
+              return Promise.resolve();
             }
 
             url.searchParams.set('set-auth-token', token);
             ctx.setHeader('location', url.toString());
+            return Promise.resolve();
           }),
         },
       ],
