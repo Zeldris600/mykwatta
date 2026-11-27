@@ -24,7 +24,7 @@ OpenAPI is the machine-readable contract. These guides add **product rules**, **
 | 4 | [04-payments-applications-deals.md](./04-payments-applications-deals.md) | Deposit → apply/offer → deal lifecycle |
 | 5 | [05-notifications.md](./05-notifications.md) | Inbox, Pusher realtime, push devices, preferences |
 | 6 | [06-kyc.md](./06-kyc.md) | KYC submit + admin review (required before publish) |
-| 7 | [07-trust-geo-escrow.md](./07-trust-geo-escrow.md) | Home stats, map/quartier, trust badges, quotes/escrow, WA Continue, ops screens |
+| 7 | [07-trust-geo-escrow.md](./07-trust-geo-escrow.md) | Home stats, map/quartier (incl. Bamenda/Bambili), trust badges, Bambili landlord checklist, quotes/escrow, WA Continue, ops screens |
 | 8 | [08-demo-accounts.md](./08-demo-accounts.md) | Seeded phones, OTP `000000`, and what each demo user already has |
 | 9 | [09-feed.md](./09-feed.md) | Platform video feed, comments/likes/shares, profiles |
 

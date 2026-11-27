@@ -5,7 +5,9 @@ import { NodeEnvironment } from '@mykwatta/core/config/env.validation';
 import { createId } from '@mykwatta/core/common/utils/uuid.util';
 import {
   AppointmentStatus,
+  ListingAudience,
   ListingStatus,
+  RentPeriod,
 } from '@mykwatta/modules/listings/constants';
 import type { DrizzleDb } from '../drizzle.provider';
 import { DRIZZLE } from '../drizzle.tokens';
@@ -198,6 +200,8 @@ export class SeederService {
         propertyType: listing.propertyType,
         priceMinor: listing.priceMinor,
         currency: listing.currency,
+        rentPeriod: listing.rentPeriod ?? RentPeriod.MONTHLY,
+        audience: listing.audience ?? ListingAudience.GENERAL,
         city: listing.city,
         neighborhood: listing.neighborhood,
         quartierId: listing.quartierId,

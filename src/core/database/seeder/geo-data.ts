@@ -5,6 +5,7 @@ export const GeoSeedIds = {
   cities: {
     yaounde: 'seed_geo_city_yaounde',
     douala: 'seed_geo_city_douala',
+    bamenda: 'seed_geo_city_bamenda',
   },
   quartiers: {
     bastos: 'seed_geo_quartier_bastos',
@@ -12,6 +13,8 @@ export const GeoSeedIds = {
     bonanjo: 'seed_geo_quartier_bonanjo',
     akwa: 'seed_geo_quartier_akwa',
     bonapriso: 'seed_geo_quartier_bonapriso',
+    bambili: 'seed_geo_quartier_bambili',
+    nkwen: 'seed_geo_quartier_nkwen',
   },
 } as const;
 
@@ -70,6 +73,12 @@ export const geoCities: GeoCitySeed[] = [
     nameFr: 'Douala',
     countryCode: 'CM',
   },
+  {
+    id: GeoSeedIds.cities.bamenda,
+    name: 'Bamenda',
+    nameFr: 'Bamenda',
+    countryCode: 'CM',
+  },
 ];
 
 export const geoQuartiers: GeoQuartierSeed[] = [
@@ -122,5 +131,26 @@ export const geoQuartiers: GeoQuartierSeed[] = [
     centerLatitude: 4.018,
     centerLongitude: 9.71,
     boundary: rectBoundaryAround(4.018, 9.71),
+  },
+  {
+    id: GeoSeedIds.quartiers.bambili,
+    cityId: GeoSeedIds.cities.bamenda,
+    name: 'Bambili',
+    nameFr: 'Bambili',
+    slug: 'bambili',
+    /** Near University of Bamenda campus. */
+    centerLatitude: 5.991,
+    centerLongitude: 10.25,
+    boundary: rectBoundaryAround(5.991, 10.25, 0.012),
+  },
+  {
+    id: GeoSeedIds.quartiers.nkwen,
+    cityId: GeoSeedIds.cities.bamenda,
+    name: 'Nkwen',
+    nameFr: 'Nkwen',
+    slug: 'nkwen',
+    centerLatitude: 5.963,
+    centerLongitude: 10.175,
+    boundary: rectBoundaryAround(5.963, 10.175, 0.01),
   },
 ];

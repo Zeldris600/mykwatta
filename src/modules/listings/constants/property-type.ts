@@ -2,6 +2,8 @@ export enum PropertyType {
   APARTMENT = 'APARTMENT',
   HOUSE = 'HOUSE',
   STUDIO = 'STUDIO',
+  /** Student residence / “cité” (Bambili and similar campus markets). */
+  CITE = 'CITE',
   DUPLEX = 'DUPLEX',
   LAND = 'LAND',
   COMMERCIAL = 'COMMERCIAL',

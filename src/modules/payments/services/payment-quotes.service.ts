@@ -1,7 +1,11 @@
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
 import { CurrencyCode } from '@mykwatta/core/common/utils/money/currency';
-import { ListingStatus } from '@mykwatta/modules/listings/constants';
+import {
+  ListingStatus,
+  ListingType,
+  RentPeriod,
+} from '@mykwatta/modules/listings/constants';
 import { ListingsService } from '@mykwatta/modules/listings/services';
 import {
   APPLICATION_FEE_AMOUNT_MINOR,
@@ -22,6 +26,10 @@ export type PaymentQuote = {
   lineItems: PaymentQuoteLineItem[];
   totalMinor: number;
   currency: CurrencyCode;
+  /** Present on listing-deposit quotes for RENT. */
+  rentPeriod?: RentPeriod;
+  /** Clarifies what the deposit covers (and what it does not). */
+  note?: string;
 };
 
 @Injectable()
@@ -35,14 +43,38 @@ export class PaymentQuotesService {
   async quoteDeposit(listingId: string): Promise<PaymentQuote> {
     const listing = await this.assertPublishedListing(listingId);
     const depositMinor = listing.priceMinor;
+    const rentPeriod =
+      listing.listingType === ListingType.RENT
+        ? ((listing.rentPeriod as RentPeriod | undefined) ?? RentPeriod.MONTHLY)
+        : undefined;
+    const periodLabel =
+      rentPeriod === RentPeriod.ACADEMIC_YEAR
+        ? 'academic-year rent'
+        : rentPeriod === RentPeriod.ANNUAL
+          ? 'annual rent'
+          : rentPeriod === RentPeriod.MONTHLY
+            ? 'monthly rent'
+            : 'listing price';
     const lineItems: PaymentQuoteLineItem[] = [
-      { label: 'Listing deposit', amountMinor: depositMinor },
+      {
+        label:
+          listing.listingType === ListingType.RENT
+            ? `Listing deposit (${periodLabel})`
+            : 'Listing deposit',
+        amountMinor: depositMinor,
+      },
     ];
-    return this.buildQuote(
+    const quote = this.buildQuote(
       PaymentPurpose.LISTING_DEPOSIT,
       lineItems,
       listing.currency,
     );
+    return {
+      ...quote,
+      ...(rentPeriod ? { rentPeriod } : {}),
+      note:
+        'This deposit holds the listing on MYKWATTA. Electricity and water bills stay between you and the landlord or utility provider — they are not paid on the platform.',
+    };
   }
 
   async quoteViewingFee(listingId: string): Promise<PaymentQuote> {

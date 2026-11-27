@@ -16,6 +16,9 @@ Every listing payload (browse, detail, mine, create/update) looks like:
   "propertyType": "APARTMENT",
   "priceMinor": 350000,
   "currency": "XAF",
+  "rentPeriod": "MONTHLY",
+  "audience": "GENERAL",
+  "isDemo": false,
   "city": "Yaoundé",
   "neighborhood": "Bastos",
   "quartierId": "seed_geo_quartier_bastos",
@@ -62,6 +65,10 @@ Every listing payload (browse, detail, mine, create/update) looks like:
 | `objectKey` | Internal — do not invent CDN URLs from it |
 | `saved` | Present when the request is authenticated (optional auth on public routes). Anonymous → typically `false` |
 | `latitude` / `longitude` | Nullable until set; required for map-bounds search |
+| `propertyType` | Includes **`CITE`** (campus cité / shared student housing). Display as “Cité”. |
+| `rentPeriod` | `MONTHLY` \| `ANNUAL` \| `ACADEMIC_YEAR` (default `MONTHLY`). Label price accordingly; deposit quote is still a platform hold, not full-year rent. |
+| `audience` | `STUDENT` \| `GENERAL` \| `BOTH` — campus discovery filter. |
+| `isDemo` | When `true`, browseable catalog only — deposits / applications / viewings blocked (`depositAvailability.reason: DEMO`). |
 
 ---
 
@@ -117,7 +124,9 @@ Only `PUBLISHED` rows.
 | `city` | string ≥ 2 | no | Case-insensitive `ILIKE %city%` |
 | `q` | string ≥ 2 | no | Matches title **or** description |
 | `listingType` | `RENT` \| `SALE` | no | Exact |
-| `propertyType` | enum | no | Exact |
+| `propertyType` | enum | no | Exact (`APARTMENT`, `HOUSE`, `STUDIO`, **`CITE`**, …) |
+| `rentPeriod` | enum | no | `MONTHLY` \| `ANNUAL` \| `ACADEMIC_YEAR` |
+| `audience` | enum | no | `STUDENT` matches `STUDENT`+`BOTH`; `GENERAL` matches `GENERAL`+`BOTH` |
 | `minPriceMinor` | int ≥ 0 | no | |
 | `maxPriceMinor` | int ≥ 0 | no | |
 | `minBedrooms` | int ≥ 0 | no | |
@@ -137,6 +146,8 @@ Only `PUBLISHED` rows.
 ```http
 GET /api/listings?city=Yaoundé&listingType=RENT&minPriceMinor=100000&maxPriceMinor=500000
 GET /api/listings?q=bastos&minBedrooms=2
+GET /api/listings?city=Bamenda&audience=STUDENT&propertyType=CITE
+GET /api/listings?rentPeriod=ACADEMIC_YEAR&audience=STUDENT
 GET /api/listings?north=3.95&south=3.80&east=11.60&west=11.40
 ```
 

@@ -11,8 +11,10 @@ import {
   MinLength,
 } from 'class-validator';
 import {
+  ListingAudience,
   ListingType,
   PropertyType,
+  RentPeriod,
 } from '@mykwatta/modules/listings/constants';
 
 export class ListListingsQueryDto {
@@ -63,6 +65,20 @@ export class ListListingsQueryDto {
   @IsOptional()
   @IsEnum(PropertyType)
   propertyType?: PropertyType;
+
+  @ApiPropertyOptional({ enum: RentPeriod })
+  @IsOptional()
+  @IsEnum(RentPeriod)
+  rentPeriod?: RentPeriod;
+
+  @ApiPropertyOptional({
+    enum: ListingAudience,
+    description:
+      'Filter by audience. STUDENT matches STUDENT and BOTH; GENERAL matches GENERAL and BOTH.',
+  })
+  @IsOptional()
+  @IsEnum(ListingAudience)
+  audience?: ListingAudience;
 
   @ApiPropertyOptional({
     type: Number,

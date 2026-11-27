@@ -106,7 +106,7 @@ GET /api/listings?north=3.95&south=3.8&east=11.6&west=11.4
 
 You can combine with `city`, `listingType`, `minPriceMinor`, amenity filters, etc.
 
-**Create/edit listing:** send `quartierId` from the quartier picker (ids from `/geo/.../quartiers`). Seeded ids: `seed_geo_quartier_bastos`, `_odza`, `_bonanjo`, `_akwa`, `_bonapriso`.
+**Create/edit listing:** send `quartierId` from the quartier picker (ids from `/geo/.../quartiers`). Seeded ids include Yaoundé/Douala (`seed_geo_quartier_bastos`, `_odza`, `_bonanjo`, `_akwa`, `_bonapriso`) and Bamenda campus (`seed_geo_quartier_bambili`, `_nkwen`). City: `seed_geo_city_bamenda`.
 
 ### Language
 
@@ -137,8 +137,17 @@ No extra fetch: trust comes on browse/detail payloads.
 }
 ```
 
-**FE UX**
+**FE UX — seeker-facing copy (what was checked)**
 
+| Checklist field | Plain language (EN) | Plain language (FR) |
+| --- | --- | --- |
+| `phoneVerified` | Owner phone verified | Téléphone du propriétaire vérifié |
+| `kycVerified` | Owner ID (KYC) checked | Pièce d'identité (KYC) contrôlée |
+| `listingVerified` / `verificationStatus === VERIFIED` | Listing inspected on site | Annonce inspectée sur place |
+| `hasPhotos` | Photos on the listing | Photos sur l'annonce |
+| `documentsVerifiedByMykwatta` / title docs | Property documents reviewed | Documents du bien examinés |
+
+- Gold is reserved for trust/verification marks only (brand guide).
 - Badge row: phone · KYC · “Listing verified” (when `listingVerified` / `verificationStatus === VERIFIED`).
 - If `trustFrozen` is ever true on a payload you somehow hold, treat as unavailable (public browse already **hides** frozen + duplicate listings).
 - Overflow menu: **Report listing** → modal →:
@@ -358,3 +367,21 @@ H. Comps strip + maintenance + rent schedules
 ```
 
 Wire deep links from notifications the same way as guide 05 (`metadata.href`).
+
+---
+
+## Bambili landlord onboarding checklist (acquisition)
+
+Ops / GTM uses this when onboarding campus landlords. Product surfaces the same steps in Studio.
+
+| # | Step | Product surface | Done when |
+| --- | --- | --- | --- |
+| 1 | Create account + phone OTP | Auth | Phone verified |
+| 2 | Submit KYC | `/studio/verification` · [06-kyc](./06-kyc.md) | KYC `APPROVED` (required to publish) |
+| 3 | Create listing (Cité / studio / flat) | `/list-property` | Draft with `propertyType`, `rentPeriod` (`ACADEMIC_YEAR` for campus), `audience: STUDENT`, Bamenda/`bambili` quartier |
+| 4 | Add ≥1 photo | Listing media | `trustChecklist.hasPhotos` |
+| 5 | Optional title / property docs | Title vault | Docs under review or verified |
+| 6 | Publish | Publish CTA | Status `PUBLISHED`, visible in explore |
+| 7 | Optional premium | `premium/apply` | Featured placement (acquisition may stay free Basic) |
+
+Seeker trust wedge: after publish, seeker detail shows phone / KYC / listing / photos checklist (gold for checked).

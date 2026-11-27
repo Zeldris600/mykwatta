@@ -39,12 +39,14 @@ import {
 import { IdentityService } from '@mykwatta/modules/identity/services';
 import { KycService } from '@mykwatta/modules/kyc/services';
 import {
+  ListingAudience,
   ListingMediaKind,
   ListingStatus,
   ListingType,
   ListingVerificationStatus,
   PREMIUM_MIN_FLOOR_PLANS,
   PREMIUM_MIN_PHOTOS,
+  RentPeriod,
 } from '@mykwatta/modules/listings/constants';
 import type {
   CreateListingDto,
@@ -107,6 +109,8 @@ export class ListingsService {
         propertyType: input.propertyType,
         priceMinor: input.priceMinor,
         currency: input.currency ?? CurrencyCode.XAF,
+        rentPeriod: input.rentPeriod ?? RentPeriod.MONTHLY,
+        audience: input.audience ?? ListingAudience.GENERAL,
         city: input.city.trim(),
         neighborhood: input.neighborhood?.trim() || null,
         addressLine: input.addressLine?.trim() || null,
@@ -284,6 +288,10 @@ export class ListingsService {
             ? { priceMinor: input.priceMinor }
             : {}),
           ...(input.currency !== undefined ? { currency: input.currency } : {}),
+          ...(input.rentPeriod !== undefined
+            ? { rentPeriod: input.rentPeriod }
+            : {}),
+          ...(input.audience !== undefined ? { audience: input.audience } : {}),
           ...(input.city !== undefined ? { city: input.city.trim() } : {}),
           ...(input.neighborhood !== undefined
             ? { neighborhood: input.neighborhood?.trim() || null }
@@ -476,6 +484,28 @@ export class ListingsService {
     }
     if (query.propertyType) {
       filters.push(eq(listings.propertyType, query.propertyType));
+    }
+    if (query.rentPeriod) {
+      filters.push(eq(listings.rentPeriod, query.rentPeriod));
+    }
+    if (query.audience) {
+      if (query.audience === ListingAudience.BOTH) {
+        filters.push(eq(listings.audience, ListingAudience.BOTH));
+      } else if (query.audience === ListingAudience.STUDENT) {
+        filters.push(
+          inArray(listings.audience, [
+            ListingAudience.STUDENT,
+            ListingAudience.BOTH,
+          ]),
+        );
+      } else {
+        filters.push(
+          inArray(listings.audience, [
+            ListingAudience.GENERAL,
+            ListingAudience.BOTH,
+          ]),
+        );
+      }
     }
     if (query.minPriceMinor !== undefined) {
       filters.push(gte(listings.priceMinor, query.minPriceMinor));
