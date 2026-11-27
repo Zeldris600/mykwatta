@@ -63,6 +63,8 @@ export function urgencyForNotificationType(
     case NotificationType.INQUIRY_CREATED:
     case NotificationType.INQUIRY_RESPONDED:
     case NotificationType.SAVED_SEARCH_MATCH:
+    case NotificationType.FEED_COMMENT_ON_YOUR_LISTING:
+    case NotificationType.FEED_COMMENT_REPLY:
       return NotificationUrgency.NORMAL;
 
     default: {

@@ -5,7 +5,9 @@ import { NodeEnvironment } from '@mykwatta/core/config/env.validation';
 import { createId } from '@mykwatta/core/common/utils/uuid.util';
 import {
   AppointmentStatus,
+  ListingAudience,
   ListingStatus,
+  RentPeriod,
 } from '@mykwatta/modules/listings/constants';
 import type { DrizzleDb } from '../drizzle.provider';
 import { DRIZZLE } from '../drizzle.tokens';
@@ -18,6 +20,7 @@ import {
   userPersonas,
 } from '../schema/identity.schema';
 import { listingInquiries } from '../schema/inquiries.schema';
+import { feedPosts } from '../schema/feed.schema';
 import { listingMedia } from '../schema/listing-media.schema';
 import { listings } from '../schema/listings.schema';
 import { payments } from '../schema/payments.schema';
@@ -28,6 +31,7 @@ import { seedGeo } from './seed-geo';
 import {
   appointments,
   favorites,
+  feedPosts as feedPostFixtures,
   inquiries,
   invites,
   listingMedia as listingMediaFixtures,
@@ -65,7 +69,7 @@ export class SeederService {
     await this.seedPayments();
     this.logSummary();
     this.logger.log(
-      'Seed complete. Akwa stays DRAFT; publish flow still needs KYC + photos for new listings.',
+      'Seed complete. Akwa stays DRAFT; demo catalog listings are PUBLISHED with isDemo=true (not bookable).',
     );
   }
 
@@ -196,6 +200,8 @@ export class SeederService {
         propertyType: listing.propertyType,
         priceMinor: listing.priceMinor,
         currency: listing.currency,
+        rentPeriod: listing.rentPeriod ?? RentPeriod.MONTHLY,
+        audience: listing.audience ?? ListingAudience.GENERAL,
         city: listing.city,
         neighborhood: listing.neighborhood,
         quartierId: listing.quartierId,
@@ -208,8 +214,9 @@ export class SeederService {
         areaSqm: listing.areaSqm,
         ownerUserId: listing.ownerUserId,
         organisationId: listing.organisationId,
-        publishedAt:
-          listing.status === ListingStatus.PUBLISHED ? now : null,
+        verificationStatus: listing.verificationStatus,
+        isDemo: listing.isDemo,
+        publishedAt: listing.status === ListingStatus.PUBLISHED ? now : null,
         createdAt: now,
         updatedAt: now,
       })),
@@ -224,6 +231,21 @@ export class SeederService {
           contentType: media.contentType,
           sortOrder: media.sortOrder,
           caption: media.caption,
+          kind: media.kind,
+          createdAt: now,
+          updatedAt: now,
+        })),
+      );
+    }
+
+    if (feedPostFixtures.length > 0) {
+      await this.db.insert(feedPosts).values(
+        feedPostFixtures.map((post) => ({
+          id: post.id,
+          listingId: post.listingId,
+          videoMediaId: post.videoMediaId,
+          status: post.status,
+          publishedAt: now,
           createdAt: now,
           updatedAt: now,
         })),
@@ -331,8 +353,9 @@ export class SeederService {
       (listing) => listing.status === ListingStatus.PUBLISHED,
     ).length;
     const drafts = listingFixtures.length - published;
+    const demo = listingFixtures.filter((listing) => listing.isDemo).length;
     this.logger.log(
-      `Listings: ${published} PUBLISHED, ${drafts} DRAFT. Media: ${listingMediaFixtures.length}. Favorites: ${favorites.length}.`,
+      `Listings: ${published} PUBLISHED (${demo} demo/non-bookable), ${drafts} DRAFT. Media: ${listingMediaFixtures.length}. Feed posts: ${feedPostFixtures.length}. Favorites: ${favorites.length}.`,
     );
   }
 }

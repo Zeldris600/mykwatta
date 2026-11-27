@@ -1,6 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  MinLength,
+} from 'class-validator';
 import { ApplicationStatus } from '@mykwatta/modules/applications/constants';
 
 const DECISIONS = [
@@ -24,7 +32,8 @@ export class DecideApplicationDto {
 
   @ApiPropertyOptional({
     example: 500,
-    description: 'Agency commission in basis points, recorded on the deal when accepted',
+    description:
+      'Agency commission in basis points, recorded on the deal when accepted',
   })
   @IsOptional()
   @Type(() => Number)

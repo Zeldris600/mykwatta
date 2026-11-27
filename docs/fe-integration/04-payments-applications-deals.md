@@ -60,6 +60,7 @@ Wrong combo → API error — validate in UI before submit.
 ### Guards (server-enforced)
 
 - Cannot deposit on **your own** listing → `FORBIDDEN` (`depositAvailability.reason: OWN_LISTING`)
+- Demo catalog listings (`isDemo: true`) → `UNAVAILABLE` (`depositAvailability.reason: DEMO`) — browseable, not bookable
 - Listing `UNDER_CONTRACT` / `ARCHIVED` / not published → `CONFLICT` (no more money collected)
 - Viewer already has a **SUCCEEDED** deposit covering the full listing fee (`amountMinor >= priceMinor`) → `CONFLICT` (`status: PAID`); FE should route to apply, not pay again
 - Open `PENDING` / `REQUIRES_ACTION` deposit → API **returns that payment** (resume checkout; does not create a second one)
@@ -88,7 +89,7 @@ Attached on `GET /listings`, `GET /listings/:id`, `GET /listings/mine` (viewer-a
 | `AVAILABLE` | Show **Pay deposit** if `canStartCheckout` (requires auth) |
 | `OPEN_CHECKOUT` | **Resume payment** → `GET /payments/:paymentId` / open `checkoutUrl` |
 | `PAID` | Hide pay; CTA **Continue to application** using `paymentId` |
-| `UNAVAILABLE` | Banner from `message` — especially `UNDER_CONTRACT` / `ARCHIVED` = **no longer available** |
+| `UNAVAILABLE` | Banner from `message` — `UNDER_CONTRACT` / `ARCHIVED` = **no longer available**; `DEMO` = catalog fixture, hide book CTAs |
 
 Do not call `POST /payments/deposits` unless `canStartCheckout === true`. On `409`, read `details.depositAvailability` and update UI.
 
@@ -373,3 +374,37 @@ Listing is `UNDER_CONTRACT`:
 - [ ] Accept confirms “this rejects other applicants + takes listing off market”  
 - [ ] Deal detail: Complete / Cancel with reason  
 - [ ] Hide listing edit while `UNDER_CONTRACT`  
+
+---
+
+## Booking E2E checklist (non-demo listing)
+
+Use a **real** published listing (`isDemo: false`). Bambili campus demos (`seed_listing_demo_bambili_*`) must stay non-bookable.
+
+| Step | Action | Expect |
+| --- | --- | --- |
+| 1 | Seeker opens listing detail | `depositAvailability.status` is `AVAILABLE` (or `PAID` / `OPEN_CHECKOUT` if already in funnel) |
+| 2 | Inquire (`POST /listings/:id/inquiries`) | Inquiry `OPEN`; optional `whatsappContinueUrl` |
+| 3 | Schedule viewing (`POST …/appointments`) | Appointment `REQUESTED` / `CONFIRMED` — blocked if `isDemo` |
+| 4 | `GET /payments/quotes/deposit?listingId=` | Line items + `totalMinor`; `rentPeriod` / `note` when annual or academic-year rent |
+| 5 | `POST /payments/deposits` with quote totals | `PENDING` / `REQUIRES_ACTION` + `checkoutUrl` in LIVE; console complete only in CONSOLE mode |
+| 6 | Payment `SUCCEEDED` | `depositAvailability.status: PAID` |
+| 7 | `POST /applications` with `paymentId` | Application created; owner can accept → deal |
+
+**Copy rules**
+
+- Platform payment = **listing deposit hold only**. Never market “pay rent / utilities via MYKWATTA”.
+- Academic-year listings: price label = academic-year rent; deposit quote is still the platform hold.
+
+---
+
+## LIVE payment + client API URL readiness
+
+| Check | Where | Pass criteria |
+| --- | --- | --- |
+| `PAYMENTS_MODE=LIVE` | API env (staging/prod) | MoMo checkout URLs are real Fapshi links (not console-only) |
+| Fapshi keys + webhook URL | API secrets / Dokploy | Webhooks reach `/api/payments/webhooks/…` and mark `SUCCEEDED` |
+| `NEXT_PUBLIC_API_URL` | **Client build-time** | Production builds bake `https://api.mykwatta.com` (rebuild required after change) |
+| CORS | API | Client origin allowed |
+| Demo CTAs | Client | Hide book/deposit when `isDemo` or `depositAvailability.reason === DEMO` |
+| CONSOLE mode | Staging/dev only | Show clear non-production messaging; never imply LIVE MoMo |

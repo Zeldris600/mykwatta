@@ -14,8 +14,10 @@ import {
 } from 'class-validator';
 import { CurrencyCode } from '@mykwatta/core/common/utils/money/currency';
 import {
+  ListingAudience,
   ListingType,
   PropertyType,
+  RentPeriod,
   TitleStatus,
 } from '@mykwatta/modules/listings/constants';
 
@@ -52,6 +54,16 @@ export class UpdateListingDto {
   @IsOptional()
   @IsEnum(CurrencyCode)
   currency?: CurrencyCode;
+
+  @ApiPropertyOptional({ enum: RentPeriod })
+  @IsOptional()
+  @IsEnum(RentPeriod)
+  rentPeriod?: RentPeriod;
+
+  @ApiPropertyOptional({ enum: ListingAudience })
+  @IsOptional()
+  @IsEnum(ListingAudience)
+  audience?: ListingAudience;
 
   @ApiPropertyOptional()
   @IsOptional()

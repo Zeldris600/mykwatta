@@ -56,7 +56,10 @@ export class CompsService {
       }
 
       const verifiedRows = await this.db
-        .select({ amountMinor: listings.priceMinor, currency: listings.currency })
+        .select({
+          amountMinor: listings.priceMinor,
+          currency: listings.currency,
+        })
         .from(listings)
         .where(and(...listingFilters));
 

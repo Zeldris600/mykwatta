@@ -3,6 +3,7 @@ export * from './appointments.schema';
 export * from './auth.schema';
 export * from './deals.schema';
 export * from './escrow.schema';
+export * from './feed.schema';
 export * from './geo.schema';
 export * from './identity.schema';
 export * from './inquiry-messages.schema';

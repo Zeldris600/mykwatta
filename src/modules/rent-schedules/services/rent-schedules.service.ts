@@ -34,10 +34,14 @@ export class RentSchedulesService {
       throw AppException.notFound(`Deal ${dealId} not found`);
     }
     if (deal.ownerUserId !== ownerUserId) {
-      throw AppException.forbidden('Only the deal owner can create rent schedules');
+      throw AppException.forbidden(
+        'Only the deal owner can create rent schedules',
+      );
     }
     if (deal.type !== DealType.LEASE || deal.status !== DealStatus.ACTIVE) {
-      throw AppException.badRequest('Rent schedule requires an active lease deal');
+      throw AppException.badRequest(
+        'Rent schedule requires an active lease deal',
+      );
     }
 
     const existing = await this.db.query.rentSchedules.findFirst({
@@ -58,7 +62,8 @@ export class RentSchedulesService {
         .where(eq(listingDeals.id, dealId));
     }
 
-    const dayOfMonth = input.dayOfMonth ?? Math.min(28, startsAt.getUTCDate() || 1);
+    const dayOfMonth =
+      input.dayOfMonth ?? Math.min(28, startsAt.getUTCDate() || 1);
     const scheduleId = createId();
 
     await this.db.transaction(async (tx) => {
@@ -148,7 +153,10 @@ export class RentSchedulesService {
         totalMinor: sql<number>`coalesce(sum(${rentScheduleItems.amountMinor}), 0)::int`,
       })
       .from(rentScheduleItems)
-      .innerJoin(rentSchedules, eq(rentScheduleItems.scheduleId, rentSchedules.id))
+      .innerJoin(
+        rentSchedules,
+        eq(rentScheduleItems.scheduleId, rentSchedules.id),
+      )
       .where(
         and(
           eq(rentSchedules.ownerUserId, ownerUserId),

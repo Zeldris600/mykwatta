@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { desc, eq, or } from 'drizzle-orm';
 import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
 import { createId } from '@mykwatta/core/common/utils/uuid.util';
@@ -20,6 +20,7 @@ export class EscrowService {
 
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDb,
+    @Inject(forwardRef(() => ListingsService))
     private readonly listings: ListingsService,
     private readonly identity: IdentityService,
   ) {}
@@ -153,10 +154,7 @@ export class EscrowService {
     if (personas.includes(Persona.PLATFORM_ADMIN)) {
       return;
     }
-    if (
-      ledger.beneficiaryUserId &&
-      ledger.beneficiaryUserId === actorUserId
-    ) {
+    if (ledger.beneficiaryUserId && ledger.beneficiaryUserId === actorUserId) {
       return;
     }
     throw AppException.forbidden(

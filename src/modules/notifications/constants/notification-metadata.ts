@@ -17,6 +17,8 @@ export type NotificationMetadata = {
   maintenanceTicketId?: string;
   vendorLeadId?: string;
   rentScheduleItemId?: string;
+  feedPostId?: string;
+  commentId?: string;
   actorUserId?: string;
   actorName?: string;
 };
@@ -32,6 +34,8 @@ export type NotificationResourceIds = {
   maintenanceTicketId?: string;
   vendorLeadId?: string;
   rentScheduleItemId?: string;
+  feedPostId?: string;
+  commentId?: string;
   actorUserId?: string;
   actorName?: string;
 };
@@ -106,6 +110,9 @@ export function buildNotificationHref(
       return ids.listingId && ids.inquiryId
         ? `/listings/${ids.listingId}/inquiries/${ids.inquiryId}`
         : '/inquiries/inbox';
+    case NotificationType.FEED_COMMENT_ON_YOUR_LISTING:
+    case NotificationType.FEED_COMMENT_REPLY:
+      return ids.feedPostId ? `/feed/${ids.feedPostId}` : '/feed';
     default: {
       const exhaustive: never = type;
       return exhaustive;

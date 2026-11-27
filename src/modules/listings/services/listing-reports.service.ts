@@ -144,6 +144,8 @@ export class ListingReportsService {
         trustFrozenReason: freezeReason,
       })
       .where(eq(listings.id, listingId));
+
+    this.listingsService.enqueueFeedSync(listingId);
   }
 
   private async getById(id: string) {

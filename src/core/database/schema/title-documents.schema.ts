@@ -1,10 +1,4 @@
-import {
-  index,
-  pgEnum,
-  pgTable,
-  text,
-  timestamp,
-} from 'drizzle-orm/pg-core';
+import { index, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import {
   TitleDocumentStatus,
   TitleDocumentType,

@@ -148,6 +148,16 @@ export class NotificationTypePreferencesDto implements Partial<
   @IsOptional()
   @IsBoolean()
   LEAD_SLA_BREACH?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  FEED_COMMENT_ON_YOUR_LISTING?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  FEED_COMMENT_REPLY?: boolean;
 }
 
 export class UpdateNotificationPreferencesDto {

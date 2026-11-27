@@ -24,10 +24,7 @@ export class TitleDocumentsController {
   constructor(private readonly titleDocuments: TitleDocumentsService) {}
 
   @Get()
-  list(
-    @Param('listingId') listingId: string,
-    @Session() session: UserSession,
-  ) {
+  list(@Param('listingId') listingId: string, @Session() session: UserSession) {
     return this.titleDocuments.listForManager(listingId, session.user.id);
   }
 

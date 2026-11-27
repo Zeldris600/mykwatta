@@ -25,6 +25,8 @@ export class RentRemindersScheduler implements OnModuleInit {
         },
       },
     );
-    this.logger.log('Rent reminders repeatable job scheduled (daily 07:00 UTC cron)');
+    this.logger.log(
+      'Rent reminders repeatable job scheduled (daily 07:00 UTC cron)',
+    );
   }
 }

@@ -17,8 +17,9 @@ import { DRIZZLE } from './drizzle.tokens';
 import type { DrizzleDb } from './drizzle.provider';
 
 /**
- * When NODE_ENV=development (API process only): migrate `DATABASE_URL`, then
- * seed if empty. Set SEED_ON_BOOT=true to wipe+seed every boot.
+ * API process only: always apply Drizzle migrations on boot, then
+ * (development only) seed if empty. Set SEED_ON_BOOT=true to wipe+seed every boot.
+ * Set MIGRATE_ON_BOOT=false to skip migrations (break-glass only).
  */
 @Injectable()
 export class DatabaseBootstrap implements OnApplicationBootstrap {
@@ -31,15 +32,22 @@ export class DatabaseBootstrap implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
-    if (this.config.nodeEnv !== NodeEnvironment.Development) {
-      return;
-    }
     if (process.env.APP_ROLE === 'worker') {
       return;
     }
 
-    await this.migrate();
-    await this.seedIfNeeded();
+    const migrateOnBoot =
+      process.env.MIGRATE_ON_BOOT !== 'false' &&
+      process.env.MIGRATE_ON_BOOT !== '0';
+    if (migrateOnBoot) {
+      await this.migrate();
+    } else {
+      this.logger.warn('MIGRATE_ON_BOOT=false — skipping migrations');
+    }
+
+    if (this.config.nodeEnv === NodeEnvironment.Development) {
+      await this.seedIfNeeded();
+    }
   }
 
   private async migrate(): Promise<void> {
@@ -75,6 +83,7 @@ export class DatabaseBootstrap implements OnApplicationBootstrap {
   private resolveMigrationsFolder(): string {
     const candidates = [
       join(process.cwd(), 'src/core/database/migrations'),
+      join(process.cwd(), 'dist/src/core/database/migrations'),
       join(process.cwd(), 'dist/core/database/migrations'),
     ];
     const found = candidates.find((path) => existsSync(path));

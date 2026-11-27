@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { desc, eq } from 'drizzle-orm';
 import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
@@ -32,10 +32,12 @@ export class PaymentsAppService {
 
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDb,
+    @Inject(forwardRef(() => ListingsService))
     private readonly listings: ListingsService,
     private readonly payments: PaymentsService,
     private readonly config: ApiConfigService,
     private readonly notifications: NotificationsService,
+    @Inject(forwardRef(() => EscrowService))
     private readonly escrow: EscrowService,
     private readonly depositAvailability: DepositAvailabilityService,
   ) {}
@@ -49,12 +51,9 @@ export class PaymentsAppService {
       );
 
       if (availability.status === DepositAvailabilityStatus.PAID) {
-        throw AppException.conflict(
-          availability.message,
-          {
-            depositAvailability: availability,
-          },
-        );
+        throw AppException.conflict(availability.message, {
+          depositAvailability: availability,
+        });
       }
 
       if (availability.status === DepositAvailabilityStatus.UNAVAILABLE) {

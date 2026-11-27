@@ -42,7 +42,7 @@ export class WebhooksController {
 
     if (!raw) {
       throw AppException.badRequest(
-        'Stripe webhook requires raw body (configure express.raw for /api/webhooks/stripe)',
+        'Stripe webhook requires the raw body',
       );
     }
 

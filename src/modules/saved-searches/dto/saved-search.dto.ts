@@ -66,7 +66,10 @@ export class SavedSearchFiltersDto {
   @MinLength(8)
   quartierId?: string;
 
-  @ApiPropertyOptional({ example: 'generator', description: 'Amenity catalog slug' })
+  @ApiPropertyOptional({
+    example: 'generator',
+    description: 'Amenity catalog slug',
+  })
   @IsOptional()
   @IsString()
   @MinLength(2)

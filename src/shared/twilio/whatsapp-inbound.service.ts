@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { and, desc, eq, or } from 'drizzle-orm';
 import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
 import { createId } from '@mykwatta/core/common/utils/uuid.util';
@@ -15,8 +15,8 @@ import {
 import {
   NotificationEntityType,
   NotificationType,
-  NotificationsService,
-} from '@mykwatta/modules/notifications';
+} from '@mykwatta/modules/notifications/constants';
+import { NotificationsService } from '@mykwatta/modules/notifications/services/notifications.service';
 import { normalizeWhatsappDialNumber } from '@mykwatta/shared/twilio/whatsapp-url.util';
 
 export type TwilioWhatsappInboundPayload = {
@@ -32,6 +32,7 @@ export class WhatsappInboundService {
 
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDb,
+    @Inject(forwardRef(() => NotificationsService))
     private readonly notifications: NotificationsService,
   ) {}
 
@@ -107,7 +108,9 @@ export class WhatsappInboundService {
     const withoutPrefix = raw.replace(/^whatsapp:/i, '');
     const digits = normalizeWhatsappDialNumber(withoutPrefix);
     if (!digits) {
-      throw AppException.badRequest('Could not resolve sender phone from webhook');
+      throw AppException.badRequest(
+        'Could not resolve sender phone from webhook',
+      );
     }
     return `+${digits}`;
   }

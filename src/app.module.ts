@@ -8,6 +8,7 @@ import { KycModule } from '@mykwatta/modules/kyc';
 import { ListingsModule } from '@mykwatta/modules/listings';
 import { NotificationsModule } from '@mykwatta/modules/notifications';
 import { EscrowModule } from '@mykwatta/modules/escrow';
+import { FeedModule } from '@mykwatta/modules/feed';
 import { PaymentsModule } from '@mykwatta/modules/payments';
 import { CatalogsModule } from '@mykwatta/modules/catalogs';
 import { CompsModule } from '@mykwatta/modules/comps';
@@ -45,6 +46,7 @@ import { TwilioModule } from '@mykwatta/shared/twilio';
     DirectoryModule,
     KycModule,
     ListingsModule,
+    FeedModule,
     PaymentsModule,
     EscrowModule,
     ApplicationsModule,

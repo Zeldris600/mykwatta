@@ -6,6 +6,10 @@ import {
   timestamp,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
+import {
+  ListingType,
+  PropertyType,
+} from '@mykwatta/modules/listings/constants';
 import { user } from './auth.schema';
 import { listings } from './listings.schema';
 
@@ -13,8 +17,8 @@ import { listings } from './listings.schema';
 export type SavedSearchFilters = {
   city?: string;
   q?: string;
-  listingType?: string;
-  propertyType?: string;
+  listingType?: ListingType;
+  propertyType?: PropertyType;
   minPriceMinor?: number;
   maxPriceMinor?: number;
   minBedrooms?: number;

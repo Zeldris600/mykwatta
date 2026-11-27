@@ -1,6 +1,7 @@
 # MYKWATTA local stack
 
-Frontend wiring: [`fe-integration/`](./fe-integration/README.md)
+Frontend wiring: [`fe-integration/`](./fe-integration/README.md)  
+Production (GHCR + Dokploy): [`DEPLOY.md`](./DEPLOY.md)
 
 ```bash
 pnpm run dev:up
@@ -11,29 +12,29 @@ pnpm run dev:up
 |----------|-------------|--------------------------------------------|
 | **API**  | `3000`      | Nest app · http://localhost:3000/api/docs  |
 | Worker   | —           | BullMQ processors                          |
-| Postgres | `5432`      | user/pass/db: `postgres` / `postgres` / `mykwatta` |
-| Redis    | `6379`      | BullMQ + cache                             |
-| RustFS   | `9000` S3, `9001` console | Primary S3-compatible object store |
+| Postgres | `POSTGRES_PORT` (default `5432`) | user/pass/db: `postgres` / `postgres` / `mykwatta` |
+| Redis    | —           | **External** — set `REDIS_URL` (e.g. another Dokploy project’s Redis) |
+| RustFS   | `S3_PORT` / `S3_CONSOLE_PORT` | Primary S3-compatible object store |
 
-App env (see `.env.example`):
+App env (see `.env.example`). Compose loads **`.env` via `env_file` only** (no hardcoded overrides):
 
-- `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/mykwatta`
-- `REDIS_URL=redis://localhost:6379`
-- `STORAGE_PROVIDER=RUSTFS` with `S3_ENDPOINT=http://localhost:9000` and matching keys
+- Host: `DATABASE_URL=…@localhost:$POSTGRES_PORT/mykwatta`, `S3_ENDPOINT=http://localhost:$S3_PORT`
+- Inside compose network: hostnames `postgres`, `rustfs`
+- Redis: `REDIS_URL=redis://<shared-redis-service>:6379` on the same Docker/Dokploy network
 - Buckets (created once on boot): `mykwatta-listings`, `mykwatta-kyc` (`StorageBucket`)
 - Payments: `PAYMENTS_MODE=CONSOLE|LIVE` — Fapshi (XAF MoMo) + Stripe (cards); webhooks under `/api/webhooks/*`
 - Pusher: `PUSHER_MODE=CONSOLE|LIVE` — private `private-user-{userId}` + event `notification`; auth `POST /api/notifications/pusher/auth`
 - Push: `PUSH_MODE=CONSOLE|LIVE` — FCM + APNs via registered `push_devices` (`POST /api/notifications/devices`)
 
-Compose overrides in-container `DATABASE_URL` / `REDIS_URL` / `S3_ENDPOINT` to service hostnames (`postgres`, `redis`, `rustfs`). Keep host `.env` on `localhost` for running the API outside Docker.
-
-With `NODE_ENV=development`, the API migrates on boot and seeds if empty (`SEED_ON_BOOT=true` to wipe+seed every boot).
+The API always migrates on boot (`MIGRATE_ON_BOOT=false` to skip). With `NODE_ENV=development`, it also seeds if empty (`SEED_ON_BOOT=true` to wipe+seed every boot).
 
 ### Seed data
 
-Seeding wipes tables and loads fixtures from [`src/core/database/seeder/data.ts`](../src/core/database/seeder/data.ts) (users, orgs, DRAFT listings, favorites, inquiries, appointments, payments). **Blocked in production.**
+Seeding wipes tables and loads fixtures from [`src/core/database/seeder/data.ts`](../src/core/database/seeder/data.ts) (users, orgs, listings, favorites, inquiries, appointments, payments). **Blocked in production.**
 
-KYC documents and listing photos are **not** seeded — upload them via the API after seed, then publish.
+Published **demo catalog** listings (`isDemo: true`) fill browse/map UI but cannot be booked — `depositAvailability.reason === DEMO`. Flow fixtures (Bastos rent, Bonanjo sale) stay bookable for OTP/deposit demos.
+
+KYC documents and real listing photos are **not** seeded — placeholder media keys only; upload via the API for real assets.
 
 | Persona | Phone | Email |
 |---------|-------|-------|

@@ -8,7 +8,12 @@ import { IdentityService } from '@mykwatta/modules/identity/services';
   imports: [
     AuthModule.forRoot({
       auth,
-      disableBodyParser: true,
+      // Nest is created with bodyParser: false so Better Auth can read /api/auth itself.
+      // This re-adds JSON and urlencoded parsers for every other route, and keeps
+      // req.rawBody for the Stripe webhook signature check.
+      bodyParser: {
+        rawBody: true,
+      },
     }),
   ],
   controllers: [IdentityController],

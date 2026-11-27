@@ -18,12 +18,15 @@ OpenAPI is the machine-readable contract. These guides add **product rules**, **
 | --- | --- | --- |
 | 0 | [00-conventions.md](./00-conventions.md) | Envelope, errors, money, enums, HTTP client setup |
 | 1 | [01-auth-identity.md](./01-auth-identity.md) | Phone OTP login/signup, session token, personas, orgs |
+| 10 | [10-social-signin.md](./10-social-signin.md) | Google OAuth sign-in/up, `set-auth-token` on redirect, personas |
 | 2 | [02-listings.md](./02-listings.md) | Discovery filters, listing CRUD, media, publish, saved |
 | 3 | [03-engagement.md](./03-engagement.md) | Inquiries → appointments → reviews |
 | 4 | [04-payments-applications-deals.md](./04-payments-applications-deals.md) | Deposit → apply/offer → deal lifecycle |
 | 5 | [05-notifications.md](./05-notifications.md) | Inbox, Pusher realtime, push devices, preferences |
 | 6 | [06-kyc.md](./06-kyc.md) | KYC submit + admin review (required before publish) |
-| 7 | [07-trust-geo-escrow.md](./07-trust-geo-escrow.md) | Home stats, map/quartier, trust badges, quotes/escrow, WA Continue, ops screens |
+| 7 | [07-trust-geo-escrow.md](./07-trust-geo-escrow.md) | Home stats, map/quartier (incl. Bamenda/Bambili), trust badges, Bambili landlord checklist, quotes/escrow, WA Continue, ops screens |
+| 8 | [08-demo-accounts.md](./08-demo-accounts.md) | Seeded phones, OTP `000000`, and what each demo user already has |
+| 9 | [09-feed.md](./09-feed.md) | Platform video feed, comments/likes/shares, profiles |
 
 ## Build order (recommended)
 
@@ -32,7 +35,7 @@ OpenAPI is the machine-readable contract. These guides add **product rules**, **
 2. Public browse + listing detail (+ saved flag)
 3. Notifications inbox + deep links (even if polling only)
 4. Inquiries + appointments
-5. KYC + owner listing create/publish/media
+5. KYC + owner listing create/publish/media (incl. VIDEO)
 6. Deposit payment (console complete locally)
 7. Applications + owner decide
 8. Deals complete/cancel
@@ -40,11 +43,14 @@ OpenAPI is the machine-readable contract. These guides add **product rules**, **
 10. Home stats + geo/quartier + trust badges (guide 07 A–C)
 11. Quotes/escrow + WhatsApp Continue CTAs (guide 07 D–E)
 12. Amenities/title/alerts → agency → comps/rent (guide 07 F–H)
+13. Video feed + profiles (guide 09)
 ```
 
 ## Seeded demo data (local)
 
-OTP codes appear in API/worker logs: `[console Twilio OTP] … code=……` when `TWILIO_MODE=console`.
+Full login steps, OTP, and preloaded inquiries/payments: [08-demo-accounts.md](./08-demo-accounts.md).
+
+When `NODE_ENV` is `development` or `test`, every send-otp accepts **`000000`**.
 
 | Persona | Phone | Email |
 | --- | --- | --- |
@@ -54,12 +60,12 @@ OTP codes appear in API/worker logs: `[console Twilio OTP] … code=……` when
 | `RENTER` | `+237670000004` | `renter@mykwatta.local` |
 | `BUYER` | `+237670000005` | `buyer@mykwatta.local` |
 
-Published listings after seed: **Bastos** (RENT, Yaoundé) and **Bonanjo** (SALE, Douala). **Akwa** stays `DRAFT`.
+Published listings after seed: **Bastos** (RENT, Yaoundé) and **Bonanjo** (SALE, Douala) — both `VERIFIED` with VIDEO and on the feed. **Akwa** stays `DRAFT`.
 
 IDs (stable):
 
-- `seed_listing_bastos_rent`
-- `seed_listing_bonanjo_sale`
+- `seed_listing_bastos_rent` / `seed_feed_bastos`
+- `seed_listing_bonanjo_sale` / `seed_feed_bonanjo`
 - `seed_listing_akwa_draft`
 
 ## Product loops (happy paths)

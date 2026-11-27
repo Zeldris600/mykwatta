@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { createId } from '@mykwatta/core/common/utils/uuid.util';
 import { ApiConfigService } from '@mykwatta/core/config';
@@ -20,7 +20,7 @@ import { EmailProducer } from '@mykwatta/shared/queue';
 import type { DeliverNotificationJobData } from '@mykwatta/shared/queue/jobs/deliver-notification.job';
 import { PushService } from '@mykwatta/shared/push';
 import { PusherService } from '@mykwatta/shared/pusher';
-import { TwilioService } from '@mykwatta/shared/twilio';
+import { TwilioService } from '@mykwatta/shared/twilio/twilio.service';
 import { NotificationPreferencesService } from './notification-preferences.service';
 import { PushDevicesService } from './push-devices.service';
 
@@ -35,6 +35,7 @@ export class NotificationDeliveryService {
     private readonly push: PushService,
     private readonly pushDevices: PushDevicesService,
     private readonly emailProducer: EmailProducer,
+    @Inject(forwardRef(() => TwilioService))
     private readonly twilio: TwilioService,
     private readonly config: ApiConfigService,
   ) {}

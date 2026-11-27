@@ -52,11 +52,7 @@ export class AdminListingsController {
     @Session() session: UserSession,
     @Body() body: AdminListingVerificationDto,
   ) {
-    return this.listingsAdmin.setVerification(
-      listingId,
-      session.user.id,
-      body,
-    );
+    return this.listingsAdmin.setVerification(listingId, session.user.id, body);
   }
 
   @Patch('title-documents/:documentId/review')
@@ -74,10 +70,6 @@ export class AdminListingsController {
     @Session() session: UserSession,
     @Body() body: AdminMarkDuplicateDto,
   ) {
-    return this.listingsAdmin.markDuplicate(
-      listingId,
-      session.user.id,
-      body,
-    );
+    return this.listingsAdmin.markDuplicate(listingId, session.user.id, body);
   }
 }

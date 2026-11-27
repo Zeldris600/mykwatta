@@ -27,7 +27,10 @@ export class RentRemindersService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  async runDaily(): Promise<{ rentRemindersSent: number; renewalNoticesSent: number }> {
+  async runDaily(): Promise<{
+    rentRemindersSent: number;
+    renewalNoticesSent: number;
+  }> {
     const rentRemindersSent = await this.sendUpcomingRentReminders();
     const renewalNoticesSent = await this.sendRenewalNotices();
     this.logger.log(
@@ -58,7 +61,10 @@ export class RentRemindersService {
         listingTitle: listings.title,
       })
       .from(rentScheduleItems)
-      .innerJoin(rentSchedules, eq(rentScheduleItems.scheduleId, rentSchedules.id))
+      .innerJoin(
+        rentSchedules,
+        eq(rentScheduleItems.scheduleId, rentSchedules.id),
+      )
       .innerJoin(listings, eq(rentSchedules.listingId, listings.id))
       .where(
         and(
@@ -124,7 +130,10 @@ export class RentRemindersService {
     let sent = 0;
     for (const row of deals) {
       const endLabel = row.deal.endsAt?.toISOString().slice(0, 10) ?? '';
-      for (const userId of [row.deal.ownerUserId, row.deal.counterpartyUserId]) {
+      for (const userId of [
+        row.deal.ownerUserId,
+        row.deal.counterpartyUserId,
+      ]) {
         this.notifications.notify({
           userId,
           type: NotificationType.LEASE_RENEWAL_NOTICE,

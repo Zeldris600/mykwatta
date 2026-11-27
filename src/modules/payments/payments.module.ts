@@ -16,7 +16,7 @@ import {
   imports: [
     forwardRef(() => ListingsModule),
     RentSchedulesModule,
-    EscrowModule,
+    forwardRef(() => EscrowModule),
   ],
   controllers: [PaymentsController, WebhooksController],
   providers: [

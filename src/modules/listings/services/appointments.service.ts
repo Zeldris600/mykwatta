@@ -58,6 +58,9 @@ export class AppointmentsService {
       }
 
       const listing = await this.listingsService.getById(inquiry.listingId);
+      if (listing.isDemo) {
+        throw AppException.badRequest('Demo listing — booking is disabled.');
+      }
       if (listing.status !== ListingStatus.PUBLISHED) {
         throw AppException.badRequest(
           'Viewings can only be scheduled on published listings',

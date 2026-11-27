@@ -1,10 +1,4 @@
-import {
-  index,
-  pgEnum,
-  pgTable,
-  text,
-  timestamp,
-} from 'drizzle-orm/pg-core';
+import { index, pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { MaintenanceTicketStatus } from '@mykwatta/modules/maintenance/constants';
 import { user } from './auth.schema';
 import { listings } from './listings.schema';

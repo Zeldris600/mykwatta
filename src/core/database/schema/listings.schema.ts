@@ -11,10 +11,12 @@ import {
 } from 'drizzle-orm/pg-core';
 import { CurrencyCode } from '@mykwatta/core/common/utils/money/currency';
 import {
+  ListingAudience,
   ListingStatus,
   ListingType,
   ListingVerificationStatus,
   PropertyType,
+  RentPeriod,
   TitleStatus,
 } from '@mykwatta/modules/listings/constants';
 import { user } from './auth.schema';
@@ -34,6 +36,16 @@ export const listingTypeEnum = pgEnum(
 export const propertyTypeEnum = pgEnum(
   'property_type',
   Object.values(PropertyType) as [PropertyType, ...PropertyType[]],
+);
+
+export const rentPeriodEnum = pgEnum(
+  'rent_period',
+  Object.values(RentPeriod) as [RentPeriod, ...RentPeriod[]],
+);
+
+export const listingAudienceEnum = pgEnum(
+  'listing_audience',
+  Object.values(ListingAudience) as [ListingAudience, ...ListingAudience[]],
 );
 
 export const currencyCodeEnum = pgEnum(
@@ -65,6 +77,14 @@ export const listings = pgTable(
     propertyType: propertyTypeEnum('property_type').notNull(),
     priceMinor: integer('price_minor').notNull(),
     currency: currencyCodeEnum('currency').notNull().default(CurrencyCode.XAF),
+    /** How rent is quoted; ignored for SALE (defaults MONTHLY). */
+    rentPeriod: rentPeriodEnum('rent_period')
+      .notNull()
+      .default(RentPeriod.MONTHLY),
+    /** Primary seeker segment for filters (campus vs general). */
+    audience: listingAudienceEnum('audience')
+      .notNull()
+      .default(ListingAudience.GENERAL),
     city: text('city').notNull(),
     neighborhood: text('neighborhood'),
     addressLine: text('address_line'),
@@ -92,6 +112,8 @@ export const listings = pgTable(
       .notNull()
       .default(TitleStatus.UNKNOWN),
     isPremium: boolean('is_premium').notNull().default(false),
+    /** Seed/catalog fixtures — browseable but not bookable (deposit/apply/appoint). */
+    isDemo: boolean('is_demo').notNull().default(false),
     trustFrozenAt: timestamp('trust_frozen_at'),
     trustFrozenReason: text('trust_frozen_reason'),
     duplicateOfListingId: text('duplicate_of_listing_id').references(
@@ -121,5 +143,8 @@ export const listings = pgTable(
     index('listings_duplicate_of_idx').on(table.duplicateOfListingId),
     index('listings_title_status_idx').on(table.titleStatus),
     index('listings_is_premium_idx').on(table.isPremium),
+    index('listings_is_demo_idx').on(table.isDemo),
+    index('listings_rent_period_idx').on(table.rentPeriod),
+    index('listings_audience_idx').on(table.audience),
   ],
 );

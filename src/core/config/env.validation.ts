@@ -6,6 +6,7 @@ import {
   IsString,
   IsUrl,
   Min,
+  MinLength,
   validateSync,
   ValidateIf,
 } from 'class-validator';
@@ -103,6 +104,49 @@ class EnvironmentVariables {
 
   @IsUrl({ require_tld: false })
   BETTER_AUTH_URL!: string;
+
+  /** Google OAuth — both required to enable "Continue with Google". */
+  @ValidateIf(
+    (env: EnvironmentVariables) =>
+      Boolean(env.GOOGLE_CLIENT_ID) || Boolean(env.GOOGLE_CLIENT_SECRET),
+  )
+  @IsString()
+  @MinLength(1)
+  GOOGLE_CLIENT_ID?: string;
+
+  @ValidateIf(
+    (env: EnvironmentVariables) =>
+      Boolean(env.GOOGLE_CLIENT_ID) || Boolean(env.GOOGLE_CLIENT_SECRET),
+  )
+  @IsString()
+  @MinLength(1)
+  GOOGLE_CLIENT_SECRET?: string;
+
+  /**
+   * HTTP Basic Auth for `/api/docs` (+ OpenAPI JSON) and `/api/auth/reference`.
+   * Required in staging/production. Optional in development/test (docs stay open if unset).
+   */
+  @ValidateIf(
+    (env: EnvironmentVariables) =>
+      env.NODE_ENV === NodeEnvironment.Staging ||
+      env.NODE_ENV === NodeEnvironment.Production ||
+      Boolean(env.SWAGGER_USER) ||
+      Boolean(env.SWAGGER_PASSWORD),
+  )
+  @IsString()
+  @MinLength(1)
+  SWAGGER_USER?: string;
+
+  @ValidateIf(
+    (env: EnvironmentVariables) =>
+      env.NODE_ENV === NodeEnvironment.Staging ||
+      env.NODE_ENV === NodeEnvironment.Production ||
+      Boolean(env.SWAGGER_USER) ||
+      Boolean(env.SWAGGER_PASSWORD),
+  )
+  @IsString()
+  @MinLength(8)
+  SWAGGER_PASSWORD?: string;
 
   @IsEnum(TwilioMode)
   TWILIO_MODE!: TwilioMode;

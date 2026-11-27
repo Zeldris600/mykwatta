@@ -14,10 +14,14 @@ import {
 } from 'class-validator';
 import { CurrencyCode } from '@mykwatta/core/common/utils/money/currency';
 import {
+  LISTING_AUDIENCES,
   LISTING_TYPES,
+  ListingAudience,
   ListingType,
   PROPERTY_TYPES,
   PropertyType,
+  RENT_PERIODS,
+  RentPeriod,
   TITLE_STATUSES,
   TitleStatus,
 } from '@mykwatta/modules/listings/constants';
@@ -53,6 +57,24 @@ export class CreateListingDto {
   @IsOptional()
   @IsEnum(CurrencyCode)
   currency?: CurrencyCode;
+
+  @ApiPropertyOptional({
+    enum: RENT_PERIODS,
+    example: RentPeriod.MONTHLY,
+    description: 'How rent is quoted (RENT listings). SALE ignores this.',
+  })
+  @IsOptional()
+  @IsEnum(RentPeriod)
+  rentPeriod?: RentPeriod;
+
+  @ApiPropertyOptional({
+    enum: LISTING_AUDIENCES,
+    example: ListingAudience.GENERAL,
+    description: 'Primary seeker segment for discovery filters',
+  })
+  @IsOptional()
+  @IsEnum(ListingAudience)
+  audience?: ListingAudience;
 
   @ApiProperty({ example: 'Yaoundé' })
   @IsString()

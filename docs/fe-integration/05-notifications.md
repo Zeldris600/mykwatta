@@ -78,6 +78,7 @@ POST /api/notifications/read-all
 | `APPLICATION_ACCEPTED` | `/deals/:dealId` (fallback `/applications/:id`) |
 | `APPLICATION_REJECTED` | `/applications/:applicationId` |
 | `DEAL_COMPLETED` / `DEAL_CANCELLED` | `/deals/:dealId` |
+| `FEED_COMMENT_ON_YOUR_LISTING` / `FEED_COMMENT_REPLY` | `/feed/:feedPostId` |
 
 **On tap:** navigate to `metadata.href` first. Extra ids on `metadata` are for prefetch / analytics.
 

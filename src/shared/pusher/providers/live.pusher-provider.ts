@@ -4,6 +4,7 @@ import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
 import { ApiConfigService } from '@mykwatta/core/config';
 import { PusherMode } from '@mykwatta/core/config/env.validation';
 import type {
+  FeedPostRealtimePayload,
   NotificationRealtimePayload,
   PusherChannelAuthResponse,
   PusherProvider,
@@ -43,7 +44,7 @@ export class LivePusherProvider implements PusherProvider {
   async trigger(
     channel: string,
     event: string,
-    data: NotificationRealtimePayload,
+    data: NotificationRealtimePayload | FeedPostRealtimePayload,
   ): Promise<void> {
     const client = this.requireClient();
     try {

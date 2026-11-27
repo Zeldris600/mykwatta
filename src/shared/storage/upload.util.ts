@@ -50,6 +50,10 @@ export function extensionForContentType(contentType: string): string {
       return 'webp';
     case 'application/pdf':
       return 'pdf';
+    case 'video/mp4':
+      return 'mp4';
+    case 'video/webm':
+      return 'webm';
     default:
       throw AppException.badRequest(`No extension mapping for ${contentType}`);
   }

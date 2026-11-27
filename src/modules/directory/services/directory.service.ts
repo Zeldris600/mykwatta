@@ -23,7 +23,9 @@ export class DirectoryService {
     try {
       const filters: SQL[] = [];
       if (query.city) {
-        filters.push(ilike(directoryProfessionals.city, `%${query.city.trim()}%`));
+        filters.push(
+          ilike(directoryProfessionals.city, `%${query.city.trim()}%`),
+        );
       }
       if (query.kind) {
         filters.push(eq(directoryProfessionals.kind, query.kind));

@@ -39,12 +39,14 @@ import {
 import { IdentityService } from '@mykwatta/modules/identity/services';
 import { KycService } from '@mykwatta/modules/kyc/services';
 import {
+  ListingAudience,
   ListingMediaKind,
   ListingStatus,
   ListingType,
   ListingVerificationStatus,
   PREMIUM_MIN_FLOOR_PLANS,
   PREMIUM_MIN_PHOTOS,
+  RentPeriod,
 } from '@mykwatta/modules/listings/constants';
 import type {
   CreateListingDto,
@@ -76,9 +78,22 @@ export class ListingsService {
     @Inject(DRIZZLE) private readonly db: DrizzleDb,
     @InjectQueue(QueueName.SAVED_SEARCH_MATCH)
     private readonly savedSearchQueue: Queue,
+    @InjectQueue(QueueName.FEED_SYNC)
+    private readonly feedSyncQueue: Queue,
     private readonly identity: IdentityService,
     private readonly kyc: KycService,
   ) {}
+
+  /** Enqueue platform feed eligibility sync (publish / verify / media / freeze). */
+  enqueueFeedSync(listingId: string): void {
+    void this.feedSyncQueue
+      .add(QueueJobName.SYNC_FEED_POST, { listingId })
+      .catch((error: unknown) => {
+        this.logger.warn(
+          `feed sync enqueue failed listing=${listingId}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      });
+  }
 
   async create(ownerUserId: string, input: CreateListingDto) {
     try {
@@ -94,6 +109,8 @@ export class ListingsService {
         propertyType: input.propertyType,
         priceMinor: input.priceMinor,
         currency: input.currency ?? CurrencyCode.XAF,
+        rentPeriod: input.rentPeriod ?? RentPeriod.MONTHLY,
+        audience: input.audience ?? ListingAudience.GENERAL,
         city: input.city.trim(),
         neighborhood: input.neighborhood?.trim() || null,
         addressLine: input.addressLine?.trim() || null,
@@ -271,6 +288,10 @@ export class ListingsService {
             ? { priceMinor: input.priceMinor }
             : {}),
           ...(input.currency !== undefined ? { currency: input.currency } : {}),
+          ...(input.rentPeriod !== undefined
+            ? { rentPeriod: input.rentPeriod }
+            : {}),
+          ...(input.audience !== undefined ? { audience: input.audience } : {}),
           ...(input.city !== undefined ? { city: input.city.trim() } : {}),
           ...(input.neighborhood !== undefined
             ? { neighborhood: input.neighborhood?.trim() || null }
@@ -351,6 +372,7 @@ export class ListingsService {
             `saved search match enqueue failed listing=${id}: ${error instanceof Error ? error.message : String(error)}`,
           );
         });
+      this.enqueueFeedSync(id);
 
       return this.getById(id);
     } catch (error) {
@@ -381,6 +403,8 @@ export class ListingsService {
         .update(listings)
         .set({ status: ListingStatus.ARCHIVED })
         .where(eq(listings.id, id));
+
+      this.enqueueFeedSync(id);
 
       return this.getById(id);
     } catch (error) {
@@ -460,6 +484,28 @@ export class ListingsService {
     }
     if (query.propertyType) {
       filters.push(eq(listings.propertyType, query.propertyType));
+    }
+    if (query.rentPeriod) {
+      filters.push(eq(listings.rentPeriod, query.rentPeriod));
+    }
+    if (query.audience) {
+      if (query.audience === ListingAudience.BOTH) {
+        filters.push(eq(listings.audience, ListingAudience.BOTH));
+      } else if (query.audience === ListingAudience.STUDENT) {
+        filters.push(
+          inArray(listings.audience, [
+            ListingAudience.STUDENT,
+            ListingAudience.BOTH,
+          ]),
+        );
+      } else {
+        filters.push(
+          inArray(listings.audience, [
+            ListingAudience.GENERAL,
+            ListingAudience.BOTH,
+          ]),
+        );
+      }
     }
     if (query.minPriceMinor !== undefined) {
       filters.push(gte(listings.priceMinor, query.minPriceMinor));
@@ -653,8 +699,9 @@ export class ListingsService {
         .select({ kind: listingMedia.kind })
         .from(listingMedia)
         .where(eq(listingMedia.listingId, id));
-      const photos = rows.filter((row) => row.kind === ListingMediaKind.PHOTO)
-        .length;
+      const photos = rows.filter(
+        (row) => row.kind === ListingMediaKind.PHOTO,
+      ).length;
       const floorPlans = rows.filter(
         (row) => row.kind === ListingMediaKind.FLOOR_PLAN,
       ).length;
@@ -723,7 +770,9 @@ export class ListingsService {
   ): Promise<string[]> {
     const normalized = [
       ...new Set(
-        slugs.map((slug) => slug.trim().toLowerCase()).filter((slug) => slug.length > 0),
+        slugs
+          .map((slug) => slug.trim().toLowerCase())
+          .filter((slug) => slug.length > 0),
       ),
     ];
     if (normalized.length === 0) {

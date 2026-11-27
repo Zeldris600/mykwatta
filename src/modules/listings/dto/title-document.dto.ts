@@ -7,7 +7,10 @@ import {
 } from '@mykwatta/modules/listings/constants';
 
 export class UploadTitleDocumentDto {
-  @ApiProperty({ enum: TITLE_DOCUMENT_TYPES, example: TitleDocumentType.TITRE_FONCIER })
+  @ApiProperty({
+    enum: TITLE_DOCUMENT_TYPES,
+    example: TitleDocumentType.TITRE_FONCIER,
+  })
   @IsEnum(TitleDocumentType)
   documentType!: TitleDocumentType;
 }
@@ -18,7 +21,10 @@ const REVIEW_DECISIONS = [
 ] as const;
 
 export class ReviewTitleDocumentDto {
-  @ApiProperty({ enum: REVIEW_DECISIONS, example: TitleDocumentStatus.APPROVED })
+  @ApiProperty({
+    enum: REVIEW_DECISIONS,
+    example: TitleDocumentStatus.APPROVED,
+  })
   @IsIn(REVIEW_DECISIONS)
   status!: (typeof REVIEW_DECISIONS)[number];
 }

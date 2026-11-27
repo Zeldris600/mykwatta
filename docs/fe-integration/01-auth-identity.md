@@ -4,6 +4,7 @@
 
 - **Login** = Better Auth phone OTP (`/api/auth/phone-number/*`)
 - **Signup** = send OTP via Better Auth, then **our** `POST /api/identity/auth/signup` (real email + name + personas)
+- **Google** = optional social path — [10-social-signin.md](./10-social-signin.md)
 - **Session** = opaque token → send as `Authorization: Bearer <token>`
 - **Personas** = account capabilities (many allowed). **Organisations** = optional agency layer (never required for renters)
 
@@ -22,11 +23,9 @@ Content-Type: application/json
 { "phoneNumber": "+237670000004" }
 ```
 
-Local (`TWILIO_MODE=console`): read code from API **or** worker logs:
+Local (`NODE_ENV=development` / `test`): always use the fixed OTP **`000000`** (override with `AUTH_DEV_OTP`). Console/worker still logs that code.
 
-```
-[console Twilio OTP] channel=whatsapp to=+237670000004 code=487919 …
-```
+Seeded phones and what each account already owns: [08-demo-accounts.md](./08-demo-accounts.md).
 
 ### Step 2 — Verify
 
@@ -36,7 +35,7 @@ Content-Type: application/json
 
 {
   "phoneNumber": "+237670000004",
-  "code": "487919"
+  "code": "000000"
 }
 ```
 

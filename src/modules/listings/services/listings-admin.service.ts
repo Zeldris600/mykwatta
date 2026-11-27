@@ -1,4 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import type { Queue } from 'bullmq';
 import { eq } from 'drizzle-orm';
 import { AppException } from '@mykwatta/core/common/exceptions/app.exception';
 import { DRIZZLE } from '@mykwatta/core/database';
@@ -11,6 +13,7 @@ import type {
   AdminMarkDuplicateDto,
 } from '@mykwatta/modules/listings/dto';
 import { ListingsService } from '@mykwatta/modules/listings/services/listings.service';
+import { QueueJobName, QueueName } from '@mykwatta/shared/queue';
 
 @Injectable()
 export class ListingsAdminService {
@@ -18,6 +21,8 @@ export class ListingsAdminService {
 
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDb,
+    @InjectQueue(QueueName.FEED_SYNC)
+    private readonly feedSyncQueue: Queue,
     private readonly listingsService: ListingsService,
     private readonly identity: IdentityService,
   ) {}
@@ -48,6 +53,7 @@ export class ListingsAdminService {
         .where(eq(listings.id, listingId));
     }
 
+    this.enqueueFeedSync(listingId);
     return this.listingsService.getById(listingId);
   }
 
@@ -70,6 +76,7 @@ export class ListingsAdminService {
       );
     }
 
+    this.enqueueFeedSync(listingId);
     return this.listingsService.getById(listingId);
   }
 
@@ -91,6 +98,17 @@ export class ListingsAdminService {
       .set({ duplicateOfListingId: input.duplicateOfListingId })
       .where(eq(listings.id, listingId));
 
+    this.enqueueFeedSync(listingId);
     return this.listingsService.getById(listingId);
+  }
+
+  private enqueueFeedSync(listingId: string): void {
+    void this.feedSyncQueue
+      .add(QueueJobName.SYNC_FEED_POST, { listingId })
+      .catch((error: unknown) => {
+        this.logger.warn(
+          `feed sync enqueue failed listing=${listingId}: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      });
   }
 }
