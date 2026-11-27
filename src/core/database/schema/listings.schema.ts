@@ -92,6 +92,8 @@ export const listings = pgTable(
       .notNull()
       .default(TitleStatus.UNKNOWN),
     isPremium: boolean('is_premium').notNull().default(false),
+    /** Seed/catalog fixtures — browseable but not bookable (deposit/apply/appoint). */
+    isDemo: boolean('is_demo').notNull().default(false),
     trustFrozenAt: timestamp('trust_frozen_at'),
     trustFrozenReason: text('trust_frozen_reason'),
     duplicateOfListingId: text('duplicate_of_listing_id').references(
@@ -121,5 +123,6 @@ export const listings = pgTable(
     index('listings_duplicate_of_idx').on(table.duplicateOfListingId),
     index('listings_title_status_idx').on(table.titleStatus),
     index('listings_is_premium_idx').on(table.isPremium),
+    index('listings_is_demo_idx').on(table.isDemo),
   ],
 );

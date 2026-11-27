@@ -30,9 +30,11 @@ The API always migrates on boot (`MIGRATE_ON_BOOT=false` to skip). With `NODE_EN
 
 ### Seed data
 
-Seeding wipes tables and loads fixtures from [`src/core/database/seeder/data.ts`](../src/core/database/seeder/data.ts) (users, orgs, DRAFT listings, favorites, inquiries, appointments, payments). **Blocked in production.**
+Seeding wipes tables and loads fixtures from [`src/core/database/seeder/data.ts`](../src/core/database/seeder/data.ts) (users, orgs, listings, favorites, inquiries, appointments, payments). **Blocked in production.**
 
-KYC documents and listing photos are **not** seeded — upload them via the API after seed, then publish.
+Published **demo catalog** listings (`isDemo: true`) fill browse/map UI but cannot be booked — `depositAvailability.reason === DEMO`. Flow fixtures (Bastos rent, Bonanjo sale) stay bookable for OTP/deposit demos.
+
+KYC documents and real listing photos are **not** seeded — placeholder media keys only; upload via the API for real assets.
 
 | Persona | Phone | Email |
 |---------|-------|-------|

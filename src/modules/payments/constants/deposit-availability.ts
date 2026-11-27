@@ -20,6 +20,8 @@ export enum DepositAvailabilityReason {
   OWN_LISTING = 'OWN_LISTING',
   ALREADY_PAID = 'ALREADY_PAID',
   OPEN_CHECKOUT = 'OPEN_CHECKOUT',
+  /** Seed/catalog fixture — visible in UI but booking is disabled. */
+  DEMO = 'DEMO',
 }
 
 export const DEPOSIT_AVAILABILITY_STATUSES = Object.values(

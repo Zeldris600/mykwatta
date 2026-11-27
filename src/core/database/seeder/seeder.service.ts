@@ -67,7 +67,7 @@ export class SeederService {
     await this.seedPayments();
     this.logSummary();
     this.logger.log(
-      'Seed complete. Akwa stays DRAFT; publish flow still needs KYC + photos for new listings.',
+      'Seed complete. Akwa stays DRAFT; demo catalog listings are PUBLISHED with isDemo=true (not bookable).',
     );
   }
 
@@ -211,6 +211,7 @@ export class SeederService {
         ownerUserId: listing.ownerUserId,
         organisationId: listing.organisationId,
         verificationStatus: listing.verificationStatus,
+        isDemo: listing.isDemo,
         publishedAt: listing.status === ListingStatus.PUBLISHED ? now : null,
         createdAt: now,
         updatedAt: now,
@@ -348,8 +349,9 @@ export class SeederService {
       (listing) => listing.status === ListingStatus.PUBLISHED,
     ).length;
     const drafts = listingFixtures.length - published;
+    const demo = listingFixtures.filter((listing) => listing.isDemo).length;
     this.logger.log(
-      `Listings: ${published} PUBLISHED, ${drafts} DRAFT. Media: ${listingMediaFixtures.length}. Feed posts: ${feedPostFixtures.length}. Favorites: ${favorites.length}.`,
+      `Listings: ${published} PUBLISHED (${demo} demo/non-bookable), ${drafts} DRAFT. Media: ${listingMediaFixtures.length}. Feed posts: ${feedPostFixtures.length}. Favorites: ${favorites.length}.`,
     );
   }
 }

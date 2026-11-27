@@ -60,6 +60,7 @@ Wrong combo → API error — validate in UI before submit.
 ### Guards (server-enforced)
 
 - Cannot deposit on **your own** listing → `FORBIDDEN` (`depositAvailability.reason: OWN_LISTING`)
+- Demo catalog listings (`isDemo: true`) → `UNAVAILABLE` (`depositAvailability.reason: DEMO`) — browseable, not bookable
 - Listing `UNDER_CONTRACT` / `ARCHIVED` / not published → `CONFLICT` (no more money collected)
 - Viewer already has a **SUCCEEDED** deposit covering the full listing fee (`amountMinor >= priceMinor`) → `CONFLICT` (`status: PAID`); FE should route to apply, not pay again
 - Open `PENDING` / `REQUIRES_ACTION` deposit → API **returns that payment** (resume checkout; does not create a second one)
@@ -88,7 +89,7 @@ Attached on `GET /listings`, `GET /listings/:id`, `GET /listings/mine` (viewer-a
 | `AVAILABLE` | Show **Pay deposit** if `canStartCheckout` (requires auth) |
 | `OPEN_CHECKOUT` | **Resume payment** → `GET /payments/:paymentId` / open `checkoutUrl` |
 | `PAID` | Hide pay; CTA **Continue to application** using `paymentId` |
-| `UNAVAILABLE` | Banner from `message` — especially `UNDER_CONTRACT` / `ARCHIVED` = **no longer available** |
+| `UNAVAILABLE` | Banner from `message` — `UNDER_CONTRACT` / `ARCHIVED` = **no longer available**; `DEMO` = catalog fixture, hide book CTAs |
 
 Do not call `POST /payments/deposits` unless `canStartCheckout === true`. On `409`, read `details.depositAvailability` and update UI.
 

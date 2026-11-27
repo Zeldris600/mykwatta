@@ -58,6 +58,9 @@ export class ApplicationsService {
       }
 
       const listing = await this.listings.getById(payment.listingId);
+      if (listing.isDemo) {
+        throw AppException.badRequest('Demo listing — booking is disabled.');
+      }
       if (listing.status !== ListingStatus.PUBLISHED) {
         throw AppException.badRequest(
           'Applications are only accepted on published listings',

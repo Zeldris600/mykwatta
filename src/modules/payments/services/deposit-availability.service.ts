@@ -24,6 +24,7 @@ type ListingDepositFields = {
   ownerUserId: string;
   priceMinor: number;
   currency: CurrencyCode;
+  isDemo?: boolean;
 };
 
 @Injectable()
@@ -45,6 +46,14 @@ export class DepositAvailabilityService {
     const requiredAmountMinor = this.requiredDepositMinor(listing);
     const currency = listing.currency;
 
+    if (listing.isDemo) {
+      return this.unavailable(
+        DepositAvailabilityReason.DEMO,
+        'Demo listing — booking is disabled.',
+        requiredAmountMinor,
+        currency,
+      );
+    }
     if (listing.status === ListingStatus.UNDER_CONTRACT) {
       return this.unavailable(
         DepositAvailabilityReason.UNDER_CONTRACT,
